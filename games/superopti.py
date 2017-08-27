@@ -7,9 +7,6 @@ from skeleton_game import Game
 
 import py_retro as retro
 
-pgaud = retro.portaudio_audio
-
-
 defaultargs = {'libretro': 'data/gambatte_libretro.dll',
                'rom': 'data/pokeblue.gb',
                'padoverlay': True}
