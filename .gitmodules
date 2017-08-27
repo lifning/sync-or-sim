@@ -1,0 +1,3 @@
+[submodule "deps/python-retro"]
+	path = deps/python-retro
+	url = https://github.com/lifning/python-retro.git

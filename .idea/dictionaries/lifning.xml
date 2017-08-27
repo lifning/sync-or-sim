@@ -1,0 +1,24 @@
+<component name="ProjectDictionaryState">
+  <dictionary name="lifning">
+    <words>
+      <w>argtypes</w>
+      <w>bitmasks</w>
+      <w>compat</w>
+      <w>gambatte</w>
+      <w>joypad</w>
+      <w>justifiers</w>
+      <w>libpath</w>
+      <w>libretro</w>
+      <w>lightgun</w>
+      <w>multitap</w>
+      <w>multithread</w>
+      <w>overscan</w>
+      <w>pygame</w>
+      <w>screenshot</w>
+      <w>snes</w>
+      <w>unserialize</w>
+      <w>wram</w>
+      <w>xrgb</w>
+    </words>
+  </dictionary>
+</component>
