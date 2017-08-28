@@ -39,11 +39,11 @@ class Rerun(Brain):
         loadedfile = pickle.load(open(self.args['file'], 'rb'))
 
         if self.recordaudio:
-            # todo: some way to determine appropriate framerate from game.  currently using values for snes
             self.wav = wave.open('output/{}_{}.wav'.format(self.__class__.name, self.game.__class__.name), 'wb')
             self.wav.setnchannels(2)
             self.wav.setsampwidth(2)
-            self.wav.setframerate(32040)
+            # HACK: specific to superopti
+            self.wav.setframerate(int(self.game.emu.get_av_info()['sample_rate']) or 32040)
 
         # describe the run
         print('replaying a run of:\t', loadedfile['game'], '\t', loadedfile['game_args'])
@@ -82,7 +82,8 @@ class Rerun(Brain):
         print('with', len(self.inputstring), 'frames of input')
 
     def Step(self):
-        if self.fps > 0:  self.clock.tick(self.fps)
+        if self.fps > 0:
+            self.clock.tick(self.fps)
         frameinput = 0
 
         if len(self.inputstring):
