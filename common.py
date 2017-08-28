@@ -84,8 +84,6 @@ class Driver:
                 pygame.display.flip()
             pygame.display.flip()
 
-            if self.brain.Victory():
-                running = False
         print('Driver: Finished at', time.asctime())
 
     def Save(self, output, screenshot=None):

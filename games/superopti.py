@@ -123,29 +123,26 @@ class SuperOpti(Game):
         # load the libretro core and feed the emulator a ROM
         self.emu = retro.core.EmulatedSystem(args['libretro'])
         self.emu.load_game_normal(open(args['rom'], 'rb').read())
+        self.name = self.emu.name
 
         # load a starting state if one was provided
-        if args['initstate']:
-            try:
-                f = open(args['initstate'], 'rb')
-                self.emu.unserialize(f.read())
-            except IOError:
-                pass
+        try:
+            f = open(args.get('initstate', ''), 'rb')
+            self.emu.unserialize(f.read())
+        except IOError:
+            pass
 
         # register rendering and input-reading callbacks
-        self.snesfb = pygame.Surface(self.emu.get_av_info()['base_size'])
-        retro.pygame_video.set_video_refresh_surface(self.emu, self.snesfb)
+        self.framebuffer = pygame.Surface(self.emu.get_av_info()['base_size'])
+        retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
         retro.portaudio_audio.set_audio_sample_internal(self.emu)
         retro.simple_input.set_input_internal(self.emu)
 
         # unplug player 2 controller so we don't get twice as many input state callbacks
         self.emu.set_controller_port_device(1, retro.DEVICE_NONE)
 
-        # don't put anything in the work ram until the emulator can
-        self.wram = None
-        self.pad = 0
-
         # showing what buttons are active
+        self.pad = 0
         self.padoverlay = None
         if self.args['padoverlay']:
             self.padoverlay = SnesPadDrawing(name='SUPER SYNC')
@@ -169,15 +166,14 @@ class SuperOpti(Game):
 
     def Thaw(self, state):
         self.emu.unserialize(state)
-        self.wram = self.emu.memory_to_string(retro.core.MEMORY_WRAM)
 
     # only convert the screen from 16-bit format to RGB888 when we need it
     def Draw(self):
         # if we don't have something to draw, or if there's no point in drawing it
-        if self.snesfb is None or not pygame.display.get_active():
+        if self.framebuffer is None or not pygame.display.get_active():
             return None
 
-        game_img = self.snesfb
+        game_img = self.framebuffer
 
         # draw the gamepad underneath if enabled
         if self.padoverlay is not None:
@@ -197,22 +193,8 @@ class SuperOpti(Game):
         # run for the specified number of frames on that pad state
         self.emu.run(1)
 
-        # fetch the work RAM
-        self.wram = self.emu.memory_to_string(retro.MEMORY_WRAM)
-        if self.wram is None:
-            print('SuperOpti: error retrieving RAM')
-
-    def _Byte(self, ofs):
-        if self.wram is None:
-            return 0
-        return ord(self.wram[ofs])
-
-    def _Word(self, ofshi, ofslo):
-        return (self._Byte(ofshi) << 8) | self._Byte(ofslo)
-
     def ScreenSize(self):
-        # w,h = self.args['screen']
-        w, h = self.snesfb.get_size()
+        w, h = self.framebuffer.get_size()
         if self.padoverlay is not None:
             w = max(256, w)
             h += self.padoverlay.frame.get_height()

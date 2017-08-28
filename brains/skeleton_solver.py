@@ -33,10 +33,6 @@ class Brain:
             self.game.Input(i)
         return self.game.Draw(),
 
-    # true iff a winning path has been found
-    def Victory(self):
-        return self.game.Victory() or self.terminated
-
     # return the list of input states from start to goal
     def Path(self):
         return []
