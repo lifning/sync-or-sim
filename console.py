@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
         for o, a in opts:
             if o in ('-h', '--help'):
-                print usage()
+                print(usage())
                 sys.exit(0)
             elif o in ('-g', '--game'):
                 subargs = a.split('@')
@@ -47,8 +47,8 @@ if __name__ == "__main__":
                 scale = int(a)
             elif o in ('-o', '--output'):
                 output = a
-    except getopt.GetoptError, err:
-        print str(err), usage()
+    except getopt.GetoptError as err:
+        print(str(err), usage())
         sys.exit(2)
 
     # run optiness with parsed arguments
