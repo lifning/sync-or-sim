@@ -121,8 +121,8 @@ class SuperOpti(Game):
         Game.__init__(self, args, defaultargs, validargs)
 
         # load the libretro core and feed the emulator a ROM
-        self.emu = retro.core.EmulatedSNES(args['libretro'])
-        self.emu.load_cartridge_normal(open(args['rom'], 'rb').read())
+        self.emu = retro.core.EmulatedSystem(args['libretro'])
+        self.emu.load_game_normal(open(args['rom'], 'rb').read())
 
         # load a starting state if one was provided
         if args['initstate']:
@@ -186,7 +186,6 @@ class SuperOpti(Game):
             joined.blit(game_img, (0, 0))
             joined.blit(pad_img, (3, game_img.get_height()))
             return joined
-
 
         return game_img
 
