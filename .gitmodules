@@ -1,4 +1,3 @@
 [submodule "deps/python-retro"]
     path = deps/python-retro
-    branch = sync-or-sim
     url = https://github.com/lifning/python-retro.git
