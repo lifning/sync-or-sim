@@ -194,6 +194,27 @@ class SuperOpti(Game):
         if self.wram is None:
             print('SuperOpti: error retrieving RAM')
 
+    def TranslateWramAddress(self, addr):
+        wramStart = 0xC000
+        wramEnd = 0xE000
+
+        if addr < wramStart or addr >= wramEnd:
+            print ("Tried to read wram at addr {0} which is outside of wram range {1}-{2}".format(addr, wramStart, wramEnd))
+            return None
+        return addr - wramStart
+
+    def ReadBytesInRange(self, startAddr, endAddr):
+        startIndex = self.TranslateWramAddress(startAddr)
+        endIndex = self.TranslateWramAddress(endAddr)
+
+        if startIndex == None or endIndex == None:
+            return None
+
+        if self.wram is None:
+            return None
+
+        return {'offset': startAddr, 'data': self.wram[startIndex:endIndex]}
+
     def _Byte(self, ofs):
         if self.wram is None:
             return 0
