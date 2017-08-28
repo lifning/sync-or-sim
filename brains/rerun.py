@@ -4,7 +4,7 @@ import os
 import wave
 from array import array
 
-import cPickle
+import pickle
 import pygame
 
 from skeleton_solver import Brain
@@ -36,7 +36,7 @@ class Rerun(Brain):
         self.recordvideo = self.args['recordvideo']
         self.recordaudio = self.args['recordaudio']
 
-        loadedfile = cPickle.load(open(self.args['file'], 'r'))
+        loadedfile = pickle.load(open(self.args['file'], 'r'))
 
         if self.recordaudio:
             # todo: some way to determine appropriate framerate from game.  currently using values for snes
@@ -46,8 +46,8 @@ class Rerun(Brain):
             self.wav.setframerate(32040)
 
         # describe the run
-        print 'replaying a run of:\t', loadedfile['game'], '\t', loadedfile['game_args']
-        print 'that was produced by:\t', loadedfile['brain'], '\t', loadedfile['brain_args']
+        print('replaying a run of:\t', loadedfile['game'], '\t', loadedfile['game_args'])
+        print('that was produced by:\t', loadedfile['brain'], '\t', loadedfile['brain_args'])
         if not self.force:
             if loadedfile['game'] != game.__class__.name:
                 raise Exception('loaded input string is for "%s"' % (loadedfile['game']))
@@ -67,19 +67,19 @@ class Rerun(Brain):
                             then *= loadedfile['brain_args'][key]
                         now = game.args[key] * self.args[key]
                         if then != now:
-                            print 'rerun: granularity mismatch! consider adjusting rerun\'s granularity.'
+                            print('rerun: granularity mismatch! consider adjusting rerun\'s granularity.')
                             mismatches.append(key)
                     elif key == 'audio':
-                        print 'rerun: be sure to use "array" for the game audio if you want to use rerun\'s sound recording.'
+                        print('rerun: be sure to use "array" for the game audio if you want to use rerun\'s sound recording.')
             if len(mismatches) > 0:
                 for key in mismatches:
-                    print key, '\n\tgame:', game.args[key],
-                    print '\n\tfile:', loadedfile['game_args'][key]
+                    print(key, '\n\tgame:', game.args[key], end=' ')
+                    print('\n\tfile:', loadedfile['game_args'][key])
                 raise Exception('game_args mismatch')
 
         self.inputstring = loadedfile['path']
         self.outputstring = []
-        print 'with', len(self.inputstring), 'frames of input'
+        print('with', len(self.inputstring), 'frames of input')
 
     def Step(self):
         if self.fps > 0:  self.clock.tick(self.fps)
@@ -87,7 +87,7 @@ class Rerun(Brain):
 
         if len(self.inputstring):  frameinput = self.inputstring.pop(0)
 
-        for i in xrange(self.granularity):
+        for i in range(self.granularity):
             self.game.Input(frameinput)
             self.outputstring.append(frameinput)
             surf = self.game.Draw()

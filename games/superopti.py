@@ -64,7 +64,7 @@ class SnesPadDrawing:
         self.frame = ctrlr
 
     def Draw(self, pad):
-        B, Y, Se, St, Up, Down, Left, Right, A, X, L, R = [pad & (1 << i) for i in xrange(12)]
+        B, Y, Se, St, Up, Down, Left, Right, A, X, L, R = [pad & (1 << i) for i in range(12)]
 
         bg = (200, 200, 200)
         fg = (150, 150, 150)
@@ -192,7 +192,7 @@ class SuperOpti(Game):
         # fetch the work RAM
         self.wram = self.emu.memory_to_string(retro.MEMORY_WRAM)
         if self.wram is None:
-            print 'SuperOpti: error retrieving RAM'
+            print('SuperOpti: error retrieving RAM')
 
     def _Byte(self, ofs):
         if self.wram is None:

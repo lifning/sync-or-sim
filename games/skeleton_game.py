@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 import pygame
-from cPickle import dumps, loads
+from pickle import dumps, loads
 
 xmax = 320  # fallback width of the screen
 ymax = 200  # fallback height of the screen
@@ -42,11 +42,11 @@ class Game:
                             invalids.append(i)
                 else:
                     if args[i] not in validator:
-                        print validator
+                        print(validator)
                         invalids.append(i)
         if len(invalids):
             for i in invalids:
-                print 'invalid value for {}: {}'.format(i, args[i])
+                print('invalid value for {}: {}'.format(i, args[i]))
             raise Exception('bad arguments provided to game.')
 
         # otherwise, we're all good...
