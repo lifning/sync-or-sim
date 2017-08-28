@@ -71,14 +71,15 @@ class SnesPadDrawing:
         fg = (150, 150, 150)
         black = (50, 50, 50)
 
-        red = (100, 0, 150)
-        yellow = red
-        blue = (150, 50, 200)
-        green = blue
-        # red = (200,50,0)
-        # yellow = (250,200,0)
-        # blue = (0,0,200)
-        # green = (50,200,0)
+        red = (200, 0, 50)
+        yellow = (200, 150, 0)
+        blue = (0, 0, 200)
+        green = (50, 200, 0)
+        if False:  # USA
+            red = (100, 0, 150)
+            yellow = red
+            blue = (150, 50, 200)
+            green = blue
 
         ctrlr = self.frame.copy()
 
