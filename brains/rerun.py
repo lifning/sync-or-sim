@@ -36,7 +36,7 @@ class Rerun(Brain):
         self.recordvideo = self.args['recordvideo']
         self.recordaudio = self.args['recordaudio']
 
-        loadedfile = pickle.load(open(self.args['file'], 'r'))
+        loadedfile = pickle.load(open(self.args['file'], 'rb'))
 
         if self.recordaudio:
             # todo: some way to determine appropriate framerate from game.  currently using values for snes
@@ -85,7 +85,8 @@ class Rerun(Brain):
         if self.fps > 0:  self.clock.tick(self.fps)
         frameinput = 0
 
-        if len(self.inputstring):  frameinput = self.inputstring.pop(0)
+        if len(self.inputstring):
+            frameinput = self.inputstring.pop(0)
 
         for i in range(self.granularity):
             self.game.Input(frameinput)

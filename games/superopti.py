@@ -9,6 +9,7 @@ import py_retro as retro
 
 defaultargs = {'libretro': 'data/gambatte_libretro.dll',
                'rom': 'data/pokeblue.gb',
+               'initstate': 'data/pokeblue.state',
                'padoverlay': True}
 
 validargs = {'libretro': os.path.isfile, 'rom': os.path.isfile, }
@@ -122,6 +123,14 @@ class SuperOpti(Game):
         # load the libretro core and feed the emulator a ROM
         self.emu = retro.core.EmulatedSNES(args['libretro'])
         self.emu.load_cartridge_normal(open(args['rom'], 'rb').read())
+
+        # load a starting state if one was provided
+        if args['initstate']:
+            try:
+                f = open(args['initstate'], 'rb')
+                self.emu.unserialize(f.read())
+            except IOError:
+                pass
 
         # register rendering and input-reading callbacks
         self.snesfb = pygame.Surface(self.emu.get_av_info()['base_size'])
