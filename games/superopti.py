@@ -197,7 +197,11 @@ class SuperOpti(Game):
     def _Byte(self, ofs):
         if self.wram is None:
             return 0
-        return ord(self.wram[ofs])
+        try:
+            return ord(self.wram[ofs])
+        except IndexError:
+            print("Tried to read memory at offset {0} but wram size is {1}".format(ofs, len(self.wram)))
+            return 0
 
     def _Word(self, ofshi, ofslo):
         return (self._Byte(ofshi) << 8) | self._Byte(ofslo)
