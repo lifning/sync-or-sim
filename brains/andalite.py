@@ -23,7 +23,7 @@ class Andalite(Sapiens):
         return Sapiens.Step(self)
 
     def sendMemory(self):
-        self.sendNewBytes(0xcc24, 0x11) # menu data
+        self.sendNewBytes(0xd009, 0x27) # menu data
 
     def sendNewBytes(self, start, lengthBytes):
         data = {'offset': start, 'data': self.game.PeekMemoryRegion(start, lengthBytes)} # menu data
