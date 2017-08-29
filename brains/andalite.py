@@ -90,16 +90,17 @@ class Telepathy:
 
     async def messageProducer(self, websocket):
         while True:
-            print("in messageproducer")
-
-            #todo use a daemon thread
-            message = await asyncio.get_event_loop().run_in_executor(None, self.bgThreadGetOutboundMemoryReads)
-
-            print("sending a message: {}".format(message))
-            pprint.pprint(message)
-            await websocket.send(message)
+            try:
+                message = await asyncio.get_event_loop().run_in_executor(None, self.bgThreadGetOutboundMemoryReads)
+                print("sending a message: {}".format(message))
+                pprint.pprint(message)
+                await websocket.send(message)
+            except queue.Empty:
+                pass
 
     def bgThreadGetOutboundMemoryReads(self):
-        return self.outboundMemoryReads.get()
+        timeoutSeconds = 3 # wait at most this many seconds, then call .get again
+        # if we do not timeout here then the app will hang indefinitely when interrupted.
+        return self.outboundMemoryReads.get(block=True, timeout=timeoutSeconds)
 
 LoadedBrain = Andalite
