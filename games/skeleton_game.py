@@ -58,18 +58,6 @@ class Game:
         ret.fill((0, 123, 45))
         return ret
 
-    # return true if the game has reached a goal state
-    def Victory(self):
-        return self.Heuristic() <= 0
-
-    # return true if the game has reached a 'dead' state
-    def Defeat(self):
-        return self.Heuristic() == float('inf')
-
-    # under-or-equal-estimate of input-frames to goal
-    def Heuristic(self):
-        return 0
-
     # return some copy of the game's state
     def Freeze(self):
         return dumps(self.__dict__)
