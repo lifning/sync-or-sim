@@ -41,7 +41,7 @@ class Andalite(Sapiens):
             if lastData == None or start != None and lastData.get('data') != data.get('data'):
                 print("writing data")
                 self.game.PokeMemoryRegion(data['offset'], data['data'])
-                self.lastSent['offset'] = data
+                self.lastSent[start] = data
         except queue.Empty:
             pass
 
