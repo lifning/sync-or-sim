@@ -24,8 +24,6 @@ class Sapiens(Brain):
     def __init__(self, game, args=None):
         Brain.__init__(self, game, args, defaultargs)
 
-        if args is None:
-            args = {}
         self.fps = self.args['fps']
         self.clock = pygame.time.Clock()
 
@@ -40,7 +38,6 @@ class Sapiens(Brain):
         self.input_log = []
         self.input_map = game.HumanInputs()
         self.pad = 0
-        self.won = False
 
         UDLR = ('up', 'down', 'left', 'right')
 
@@ -69,9 +66,7 @@ class Sapiens(Brain):
         self.clock.tick(self.fps)
         self.game.Input(self.pad)
         self.input_log.append(self.pad)
-        pygame.display.set_caption('{}'.format(self.game.Heuristic()))
-        if self.game.Victory() and not self.won:
-            self.won = True
+        pygame.display.set_caption('{}'.format(self.game.name))
         return self.game.Draw(),
 
     def Event(self, evt):

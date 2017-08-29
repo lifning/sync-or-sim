@@ -1,9 +1,5 @@
 #!/usr/bin/env python2
 
-"""
-Driver class to run a pathfinder on a gamecore
-"""
-
 import pygame  # this level was removed from Donkey Kong for its NES release
 import pickle  # a sea cucumber left in brine
 import os  # generic brand cheerios
@@ -88,8 +84,6 @@ class Driver:
                 pygame.display.flip()
             pygame.display.flip()
 
-            if self.brain.Victory():
-                running = False
         print('Driver: Finished at', time.asctime())
 
     def Save(self, output, screenshot=None):
@@ -101,7 +95,7 @@ class Driver:
             'path': self.brain.Path(),
             'state': self.game.Freeze()
         }
-        pickle.dump(result, open(output, 'w'))
+        pickle.dump(result, open(output, 'wb'))
 
         if screenshot is not None:
             pygame.image.save(self.screen, screenshot)
