@@ -13,23 +13,14 @@ class Andalite(Sapiens):
     name = 'andalite'
     lastSent = {}
 
-    def __init__(self, game, args=None):
+    def __init__(self, game, args=None, server='ws://localhost:8765'):
         Sapiens.__init__(self, game, args)
-        self.telepathy = Telepathy()
+        self.telepathy = Telepathy(server)
 
     def Step(self):
         self.sendMemory()
         self.receiveBytes()
         return Sapiens.Step(self)
-
-    def Event(self, evt):
-        Sapiens.Event(self, evt)
-
-    def Path(self):
-        return Sapiens.Path(self)
-
-    def Victory(self):
-        return Sapiens.Victory(self)
 
     def sendMemory(self):
         self.sendNewBytes(0xcc24, 0x11) # menu data
@@ -58,20 +49,19 @@ class Telepathy:
     inboundMemoryWrites = queue.Queue()
     outboundMemoryReads = queue.Queue()
 
-    def __init__(self):
+    def __init__(self, server):
+        self.server = server
         thread = threading.Thread(target=self.threadMain, args=())
         thread.daemon = True
         thread.start()
-        #asyncio.get_event_loop().run_forever()
+
     def threadMain(self):
         loop = asyncio.new_event_loop()
-        #loop.run_in_executor(executor, self.handleSocket)
         loop.create_task(self.handleSocket())
         loop.run_forever()
 
-
     async def handleSocket(self):
-        async with websockets.connect('ws://localhost:8765') as websocket:
+        async with websockets.connect(self.server) as websocket:
             print("connected to websocket")
             consumerTask = asyncio.ensure_future(self.messageConsumer(websocket))
             producerTask = asyncio.ensure_future(self.messageProducer(websocket))
