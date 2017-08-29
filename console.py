@@ -6,7 +6,7 @@ import sys
 import common
 
 # default game and solver to use
-game_mod_name, brain_mod_name = ('superopti', 'sapiens')
+game_mod_name, brain_mod_name = ('superopti', 'andalite')
 game_args, brain_args = ({}, {})
 
 scale = 1  # we may want to make the display output bigger
