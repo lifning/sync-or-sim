@@ -136,7 +136,8 @@ class SuperOpti(Game):
         # register rendering and input-reading callbacks
         self.framebuffer = pygame.Surface(self.emu.get_av_info()['base_size'])
         retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
-        retro.portaudio_audio.set_audio_sample_internal(self.emu)
+        # disabled until there's a decent audio implementation
+        # retro.portaudio_audio.set_audio_sample_internal(self.emu)
         retro.simple_input.set_input_internal(self.emu)
 
         # unplug player 2 controller so we don't get twice as many input state callbacks
