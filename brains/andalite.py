@@ -32,10 +32,10 @@ class Andalite(Sapiens):
         return Sapiens.Victory(self)
 
     def sendMemory(self):
-        self.sendNewBytes(0xcc24, 0xcc35) # menu data
+        self.sendNewBytes(0xcc24, 11) # menu data
 
-    def sendNewBytes(self, start, end):
-        data = self.game.ReadBytesInRange(start, end) # menu data
+    def sendNewBytes(self, start, lengthBytes):
+        data = {'offset': start, 'data': self.game.PeekMemoryRegion(start, lengthBytes)} # menu data
         lastSentData = self.lastSent.get(start)
         if lastSentData != data:
             self.telepathy.outboundMemoryReads.put_nowait(str(data))
@@ -48,7 +48,8 @@ class Andalite(Sapiens):
             lastData = self.lastSent.get(start)
 
             if lastData == None or start != None and lastData.get('data') != data.get('data'):
-                print("todo: write data")
+                print("writing data")
+                self.game.PokeMemoryRegion(data['offset'], data['data'])
                 self.lastSent['offset'] = data
         except queue.Empty:
             pass

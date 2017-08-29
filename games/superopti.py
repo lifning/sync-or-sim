@@ -201,5 +201,10 @@ class SuperOpti(Game):
             h += self.padoverlay.frame.get_height()
         return w, h
 
+    def PeekMemoryRegion(self, offset, length):
+        return self.emu.peek_memory_region(offset, length)
+
+    def PokeMemoryRegion(self, offset, data):
+        self.emu.poke_memory_region(offset, data)
 
 LoadedGame = SuperOpti
