@@ -8,6 +8,7 @@ import threading
 import websockets
 
 from sapiens import Sapiens
+from sync import game_sync_classes
 
 class Andalite(Sapiens):
     name = 'andalite'
@@ -16,36 +17,34 @@ class Andalite(Sapiens):
     def __init__(self, game, args=None, server='ws://localhost:8765'):
         Sapiens.__init__(self, game, args)
         self.telepathy = Telepathy(server)
+        # get sync class for the currently loaded game.
+        game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
+        if game_sync_class != None:
+            self.game_sync = game_sync_class(self.readMemory, self.writeMemory)
 
     def Step(self):
-        self.sendMemory()
-        self.receiveBytes()
+        if self.game_sync != None:
+            to_send = self.game_sync.on_emulator_step(self.getReceivedData())
+            if len(to_send) > 0:
+                self.sendData(to_send)
+
         return Sapiens.Step(self)
 
-    def sendMemory(self):
-        self.sendNewBytes(0xd009, 0x27) # active pokemon in battle
-        self.sendNewBytes(0xd158, 0x19e) # player & party
-        self.sendNewBytes(0xd31d, 0x2c) # items & money
+    def readMemory(self, offset, length):
+        return self.game.PeekMemoryRegion(offset, length)
 
-    def sendNewBytes(self, start, lengthBytes):
-        data = {'offset': start, 'data': self.game.PeekMemoryRegion(start, lengthBytes)} # menu data
-        lastSentData = self.lastSent.get(start)
-        if lastSentData != data:
-            self.telepathy.outboundMemoryReads.put_nowait(str(data))
-            self.lastSent[start] = data
+    def writeMemory(self, offset, data):
+        self.game.PokeMemoryRegion(offset, data)
 
-    def receiveBytes(self):
+    def getReceivedData(self):
         try:
             data = self.telepathy.inboundMemoryWrites.get_nowait()
-            start = data.get('offset')
-            lastData = self.lastSent.get(start)
-
-            if lastData == None or start != None and lastData.get('data') != data.get('data'):
-                print("writing data")
-                self.game.PokeMemoryRegion(data['offset'], data['data'])
-                self.lastSent[start] = data
+            return data
         except queue.Empty:
-            pass
+            return []
+
+    def sendData(self, data):
+        self.telepathy.outboundMemoryReads.put_nowait(str(data))
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()
