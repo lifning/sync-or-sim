@@ -1,7 +1,5 @@
 import ast
 import asyncio
-import concurrent
-import json
 import pprint
 import queue
 import threading
@@ -9,12 +7,13 @@ import websockets
 
 from sapiens import Sapiens
 
+
 class Andalite(Sapiens):
     name = 'andalite'
     lastSent = {}
 
-    def __init__(self, game, args=None, server='ws://localhost:8765'):
-        Sapiens.__init__(self, game, args)
+    def __init__(self, game, server='ws://localhost:8765', **kwargs):
+        Sapiens.__init__(self, game, **kwargs)
         self.telepathy = Telepathy(server)
 
     def Step(self):
@@ -23,7 +22,7 @@ class Andalite(Sapiens):
         return Sapiens.Step(self)
 
     def sendMemory(self):
-        self.sendNewBytes(0xd009, 0x27) # menu data
+        self.sendNewBytes(0xd009, 0x27)  # menu data
 
     def sendNewBytes(self, start, lengthBytes):
         data = {'offset': start, 'data': self.game.PeekMemoryRegion(start, lengthBytes)} # menu data
@@ -38,12 +37,13 @@ class Andalite(Sapiens):
             start = data.get('offset')
             lastData = self.lastSent.get(start)
 
-            if lastData == None or start != None and lastData.get('data') != data.get('data'):
+            if lastData is None or start is not None and lastData.get('data') != data.get('data'):
                 print("writing data")
                 self.game.PokeMemoryRegion(data['offset'], data['data'])
                 self.lastSent[start] = data
         except queue.Empty:
             pass
+
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()

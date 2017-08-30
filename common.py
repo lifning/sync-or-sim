@@ -53,8 +53,8 @@ class Driver:
             game_args = {}
         if brain_args is None:
             brain_args = {}
-        self.game = __import__(game_mod_name).LoadedGame(game_args)
-        self.brain = __import__(brain_mod_name).LoadedBrain(self.game, brain_args)
+        self.game = __import__(game_mod_name).LoadedGame(**game_args)
+        self.brain = __import__(brain_mod_name).LoadedBrain(self.game, **brain_args)
 
         self.scale = scale
 
