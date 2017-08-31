@@ -6,6 +6,7 @@ import threading
 import websockets
 
 from sapiens import Sapiens
+from sync import game_sync_classes
 
 
 class Andalite(Sapiens):
@@ -15,35 +16,27 @@ class Andalite(Sapiens):
     def __init__(self, game, server='ws://localhost:8765', **kwargs):
         Sapiens.__init__(self, game, **kwargs)
         self.telepathy = Telepathy(server)
+        # get sync class for the currently loaded game.
+        game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
+        if game_sync_class is not None:
+            self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
 
     def Step(self):
-        self.sendMemory()
-        self.receiveBytes()
+        if self.game_sync is not None:
+            self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
+
         return Sapiens.Step(self)
 
-    def sendMemory(self):
-        self.sendNewBytes(0xd009, 0x27)  # menu data
-
-    def sendNewBytes(self, start, lengthBytes):
-        data = {'offset': start, 'data': self.game.PeekMemoryRegion(start, lengthBytes)} # menu data
-        lastSentData = self.lastSent.get(start)
-        if lastSentData != data:
-            self.telepathy.outboundMemoryReads.put_nowait(str(data))
-            self.lastSent[start] = data
-
-    def receiveBytes(self):
+    def getReceivedData(self):
         try:
             data = self.telepathy.inboundMemoryWrites.get_nowait()
-            start = data.get('offset')
-            lastData = self.lastSent.get(start)
-
-            if lastData is None or start is not None and lastData.get('data') != data.get('data'):
-                print("writing data")
-                self.game.PokeMemoryRegion(data['offset'], data['data'])
-                self.lastSent[start] = data
+            return data
         except queue.Empty:
-            pass
+            return []
 
+    def sendData(self, data):
+        if data:
+            self.telepathy.outboundMemoryReads.put_nowait(str(data))
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()
