@@ -7,7 +7,4 @@ gameSyncMap = {
 }
 
 def get_game_sync_class(gameName):
-    game_sync = gameSyncMap.get(gameName)
-    if game_sync == None:
-        return None
-    return game_sync
+    return gameSyncMap.get(gameName)

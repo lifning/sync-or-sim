@@ -6,7 +6,7 @@ class SimpleOnChangeStrategy(IStrategy):
     # and applies data immediately when it is received (before collecting data to send)
     def __init__(self, offset_length_pairs):
         self.offset_length_pairs = offset_length_pairs
-        self.interesting_offsets = list(list(zip(*offset_length_pairs))[0]) # just a list of all the offsets
+        self.interesting_offsets = [offset for offset, _ in offset_length_pairs] # just a list of all the offsets
 
     def on_emulator_step(self, caller, received_data):
         self.write_received_data_to_memory(caller, received_data)
@@ -14,6 +14,7 @@ class SimpleOnChangeStrategy(IStrategy):
         return data_to_send
 
     def read_memory_for_changes(self, caller):
+        # this sends all the interesting offsets' data, or none, never a partial subset.
         change_seen = False
         data_to_send = []
         for offset, length in self.offset_length_pairs:
@@ -33,10 +34,8 @@ class SimpleOnChangeStrategy(IStrategy):
     def write_received_data_to_memory(self, caller, received_data):
         for data in received_data:
             offset = data.get('offset')
-            if not offset in self.interesting_offsets:
-                continue # this offset was boring, but who's to say the next isn't
-
-            mem = data.get('data')
-            caller.write_memory(offset, mem)
-            self.last_seen[offset] = data # also update last_seen so we don't send back something that we just wrote.
+            if offset in self.interesting_offsets:
+                mem = data.get('data')
+                caller.write_memory(offset, mem)
+                self.last_seen[offset] = data # also update last_seen so we don't send back something that we just wrote.
 

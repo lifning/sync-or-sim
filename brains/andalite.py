@@ -19,22 +19,14 @@ class Andalite(Sapiens):
         self.telepathy = Telepathy(server)
         # get sync class for the currently loaded game.
         game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
-        if game_sync_class != None:
-            self.game_sync = game_sync_class(self.readMemory, self.writeMemory)
+        if game_sync_class is not None:
+            self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
 
     def Step(self):
         if self.game_sync != None:
-            to_send = self.game_sync.on_emulator_step(self.getReceivedData())
-            if len(to_send) > 0:
-                self.sendData(to_send)
+            self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
 
         return Sapiens.Step(self)
-
-    def readMemory(self, offset, length):
-        return self.game.PeekMemoryRegion(offset, length)
-
-    def writeMemory(self, offset, data):
-        self.game.PokeMemoryRegion(offset, data)
 
     def getReceivedData(self):
         try:
@@ -44,7 +36,8 @@ class Andalite(Sapiens):
             return []
 
     def sendData(self, data):
-        self.telepathy.outboundMemoryReads.put_nowait(str(data))
+        if to_send:
+            self.telepathy.outboundMemoryReads.put_nowait(str(data))
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()
