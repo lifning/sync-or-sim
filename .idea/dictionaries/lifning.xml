@@ -4,7 +4,9 @@
       <w>argtypes</w>
       <w>bitmasks</w>
       <w>compat</w>
+      <w>framebuffer</w>
       <w>gambatte</w>
+      <w>gamepad</w>
       <w>joypad</w>
       <w>justifiers</w>
       <w>libpath</w>
@@ -12,12 +14,15 @@
       <w>lightgun</w>
       <w>multitap</w>
       <w>multithread</w>
+      <w>opti</w>
       <w>overscan</w>
       <w>pygame</w>
       <w>screenshot</w>
       <w>snes</w>
+      <w>superopti</w>
       <w>unserialize</w>
       <w>wram</w>
+      <w>wsad</w>
       <w>xrgb</w>
     </words>
   </dictionary>

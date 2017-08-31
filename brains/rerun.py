@@ -8,26 +8,22 @@ import pygame
 
 from skeleton_solver import Brain
 
-default_args = {'file': 'output/last_run.pickle',
-                'force': False,
-                'recordvideo': False,
-                'recordaudio': False}
-
 
 class Rerun(Brain):
     name = 'rerun'
 
-    def __init__(self, game, **kwargs):
-        Brain.__init__(self, game, default_args, **kwargs)
+    def __init__(self, game, *_,
+                 replay_input='output/last_run.pickle', write_png=False, write_wav=False,
+                 skip_valid_check=False):
+        Brain.__init__(self, game)
 
-        self.force = self.args['force']
-        self.recordvideo = self.args['recordvideo']
-        self.recordaudio = self.args['recordaudio']
+        self.recordvideo = write_png
+        self.recordaudio = write_wav
 
-        loadedfile = pickle.load(open(self.args['file'], 'rb'))
+        loadedfile = pickle.load(open(replay_input, 'rb'))
 
         if self.recordaudio:
-            self.wav = wave.open('output/{}_{}.wav'.format(self.__class__.name, self.game.__class__.name), 'wb')
+            self.wav = wave.open('output/{}_{}.wav'.format(self.name, self.game.name), 'wb')
             self.wav.setnchannels(2)
             self.wav.setsampwidth(2)
             # HACK: specific to superopti
@@ -36,24 +32,9 @@ class Rerun(Brain):
         # describe the run
         print('replaying a run of:\t', loadedfile['game'], '\t', loadedfile['game_args'])
         print('that was produced by:\t', loadedfile['brain'], '\t', loadedfile['brain_args'])
-        if not self.force:
-            if loadedfile['game'] != game.__class__.name:
+        if not skip_valid_check:
+            if loadedfile['game'] != game.name:
                 raise Exception('loaded input string is for "%s"' % (loadedfile['game']))
-
-            mismatches = []
-            for key in game.args:
-                if key == 'audio':
-                    print('rerun: be sure to use "array" for the game audio if you want to use rerun\'s sound recording.')
-                else:
-                    # note: old args being dropped are implicitly ignored by this loop.
-                    # explicitly ignore new features with this conditional.
-                    if key in loadedfile['game_args'] and loadedfile['game_args'][key] != game.args[key]:
-                        mismatches.append(key)
-            if len(mismatches) > 0:
-                for key in mismatches:
-                    print(key, '\n\tgame:', game.args[key], end=' ')
-                    print('\n\tfile:', loadedfile['game_args'][key])
-                raise Exception('game_args mismatch')
 
         self.inputstring = loadedfile['path']
         self.outputstring = []
@@ -68,16 +49,16 @@ class Rerun(Brain):
             surf = self.game.Draw()
 
             if self.recordvideo:
-                pygame.image.save(surf,
-                                  'output/%s_%s_%04d.png' % (self.__class__.name,
-                                                             self.game.__class__.name,
-                                                             len(self.outputstring)))
+                pygame.image.save(surf, 'output/%s_%s_%04d.png' % (self.name, self.game.name,
+                                                                   len(self.outputstring)))
             if self.recordaudio:
                 self.wav.writeframesraw(array('H', self.game.Sound()).tostring())
-
         else:
+            self.game.Input(0)
             surf = self.game.Draw()
-            self.wav.close()
+            if self.recordaudio:
+                self.wav.close()
+                self.recordaudio = False
 
         yield surf
 

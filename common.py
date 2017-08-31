@@ -48,19 +48,15 @@ util = UtilType()
 
 
 class Driver:
-    def __init__(self, game_mod_name, brain_mod_name, game_args=None, brain_args=None, scale=1):
-        if game_args is None:
-            game_args = {}
-        if brain_args is None:
-            brain_args = {}
-        self.game = __import__(game_mod_name).LoadedGame(**game_args)
-        self.brain = __import__(brain_mod_name).LoadedBrain(self.game, **brain_args)
+    def __init__(self, game, brain, game_args, brain_args):
+        self.game = game(**game_args)
+        self.brain = brain(self.game, **brain_args)
 
-        self.scale = scale
+        self.game_args = game_args
+        self.brain_args = brain_args
 
-        xmax, ymax = self.brain.ScreenSize()
-        self.winsize = (xmax * scale, ymax * scale)
-        self.screen = pygame.display.set_mode(self.winsize)
+        self.win_size = self.brain.ScreenSize()
+        self.screen = pygame.display.set_mode(self.win_size)
 
     def Run(self):
         running = True
@@ -76,11 +72,7 @@ class Driver:
                         running = False
                 # if relevant, draw the screen
                 if surf is not None:
-                    # scale it, and show it
-                    scaled = surf
-                    if self.scale != 1:
-                        scaled = pygame.transform.scale(surf, self.winsize)
-                    self.screen.blit(scaled, (0, 0))
+                    self.screen.blit(surf, (0, 0))
                 pygame.display.flip()
             pygame.display.flip()
 
@@ -88,10 +80,10 @@ class Driver:
 
     def Save(self, output, screenshot=None):
         result = {
-            'game': self.game.__class__.name,
-            'game_args': self.game.args,
-            'brain': self.brain.__class__.name,
-            'brain_args': self.brain.args,
+            'game': self.game.name,
+            'game_args': self.game_args,
+            'brain': self.brain.name,
+            'brain_args': self.brain_args,
             'path': self.brain.Path(),
             'state': self.game.Freeze()
         }
