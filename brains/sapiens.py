@@ -7,13 +7,9 @@ from skeleton_solver import Brain
 pygame.joystick.init()  # hack to allow argument validation
 joylist = [pygame.joystick.Joystick(i).get_name() for i in range(pygame.joystick.get_count())]
 
-defaultargs = {'fps': 60,  # run at 60fps because we have a human watching
-               'joynum': joylist[0],
+defaultargs = {'joynum': joylist[0],
                'keyhat': 'wsad',
                'keybuttons': 'klji1056'}
-
-validargs = {'fps': lambda x: x >= 0,
-             'joynum': joylist}
 
 
 # lambda x: x == 0 or (x > 0 and x < pygame.joystick.get_count()) }
@@ -21,11 +17,8 @@ validargs = {'fps': lambda x: x >= 0,
 class Sapiens(Brain):
     name = 'sapiens'
 
-    def __init__(self, game, args=None):
-        Brain.__init__(self, game, args, defaultargs)
-
-        self.fps = self.args['fps']
-        self.clock = pygame.time.Clock()
+    def __init__(self, game, **kwargs):
+        Brain.__init__(self, game, defaultargs, **kwargs)
 
         joynum = self.args['joynum']
         if type(joynum) == str:
@@ -63,7 +56,6 @@ class Sapiens(Brain):
                 self.key_map[ord(keybuttons[i])] = map[i]
 
     def Step(self):
-        self.clock.tick(self.fps)
         self.game.Input(self.pad)
         self.input_log.append(self.pad)
         pygame.display.set_caption('{}'.format(self.game.name))

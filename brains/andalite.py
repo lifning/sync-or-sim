@@ -1,7 +1,5 @@
 import ast
 import asyncio
-import concurrent
-import json
 import pprint
 import queue
 import threading
@@ -10,12 +8,13 @@ import websockets
 from sapiens import Sapiens
 from sync import game_sync_classes
 
+
 class Andalite(Sapiens):
     name = 'andalite'
     lastSent = {}
 
-    def __init__(self, game, args=None, server='ws://localhost:8765'):
-        Sapiens.__init__(self, game, args)
+    def __init__(self, game, server='ws://localhost:8765', **kwargs):
+        Sapiens.__init__(self, game, **kwargs)
         self.telepathy = Telepathy(server)
         # get sync class for the currently loaded game.
         game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
@@ -23,7 +22,7 @@ class Andalite(Sapiens):
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
 
     def Step(self):
-        if self.game_sync != None:
+        if self.game_sync is not None:
             self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
 
         return Sapiens.Step(self)

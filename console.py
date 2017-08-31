@@ -9,49 +9,31 @@ import common
 game_mod_name, brain_mod_name = ('superopti', 'andalite')
 game_args, brain_args = ({}, {})
 
-scale = 1  # we may want to make the display output bigger
-output = 'output/last_run.pickle'  # default value for the output pickle
+replay_output = 'output/last_run.pickle'  # default value for the output pickle
 
-
-def usage():
-    return """
-todo: help.  for now, here's a list of game and brain modules:
-{}
-{}
-""".format(list(common.util.ListGames()),
-           list(common.util.ListBrains()))
+all_games = list(common.util.ListGames())
+all_brains = list(common.util.ListBrains())
 
 
 if __name__ == "__main__":
     # parse command line arguments
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hg:b:s:o:", ["help", "game=", "brain=", "scale=", "output="])
+    opts, args = getopt.getopt(sys.argv[1:], "g:b:", ["game=", "brain="])
 
-        for o, a in opts:
-            if o in ('-h', '--help'):
-                print(usage())
-                sys.exit(0)
-            elif o in ('-g', '--game'):
-                subargs = a.split('@')
-                game_mod_name = subargs[0]
-                for i in subargs[1:]:
-                    key, val = i.split(':')
-                    game_args[key] = val
-            elif o in ('-b', '--brain'):
-                subargs = a.split('@')
-                brain_mod_name = subargs[0]
-                for i in subargs[1:]:
-                    key, val = i.split(':')
-                    brain_args[key] = val
-            elif o in ('-s', '--scale'):
-                scale = int(a)
-            elif o in ('-o', '--output'):
-                output = a
-    except getopt.GetoptError as err:
-        print(str(err), usage())
-        sys.exit(2)
+    for o, a in opts:
+        if o in ('-g', '--game'):
+            subargs = a.split('@')
+            game_mod_name = subargs[0]
+            for i in subargs[1:]:
+                key, val = i.split(':')
+                game_args[key] = val
+        elif o in ('-b', '--brain'):
+            subargs = a.split('@')
+            brain_mod_name = subargs[0]
+            for i in subargs[1:]:
+                key, val = i.split(':')
+                brain_args[key] = val
 
     # run optiness with parsed arguments
-    driver = common.Driver(game_mod_name, brain_mod_name, game_args, brain_args, scale)
+    driver = common.Driver(game_mod_name, brain_mod_name, game_args, brain_args)
     driver.Run()
-    driver.Save(output)
+    driver.Save(replay_output)
