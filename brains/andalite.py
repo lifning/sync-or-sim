@@ -36,7 +36,7 @@ class Andalite(Sapiens):
             return []
 
     def sendData(self, data):
-        if to_send:
+        if data:
             self.telepathy.outboundMemoryReads.put_nowait(str(data))
 
 class Telepathy:
