@@ -7,28 +7,23 @@ from skeleton_game import Game
 from visualization.snespad import SnesPadDrawing
 import visualization.textlog
 
-defaultargs = {'libretro': 'data/gambatte_libretro.dylib',
-               'rom': 'data/pokeblue.gb',
-               'initstate': 'data/pokeblue.state',
-               'padoverlay': True,
-               'scalefactor': 2}
-
 
 class SuperOpti(Game):
     name = 'superopti'
 
-    def __init__(self, **kwargs):
-        Game.__init__(self, defaultargs, **kwargs)
+    def __init__(self, *_, libretro='data/gambatte_libretro.dll', rom='data/pokeblue.gb',
+                 state='data/pokeblue.state', draw_pad=True):
+        Game.__init__(self)
 
         # load the libretro core and feed the emulator a ROM
-        self.emu = retro.core.EmulatedSystem(self.args['libretro'])
-        self.emu.load_game_normal(open(self.args['rom'], 'rb').read())
+        self.emu = retro.core.EmulatedSystem(libretro)
+        self.emu.load_game_normal(open(rom, 'rb').read())
         self.name = self.emu.name
 
         # load a starting state if one was provided
         try:
-            f = open(self.args.get('initstate', ''), 'rb')
-            self.emu.unserialize(f.read())
+            with open(state or '', 'rb') as f:
+                self.Thaw(f.read())
         except IOError:
             pass
 
@@ -44,9 +39,7 @@ class SuperOpti(Game):
 
         # showing what buttons are active
         self.pad = 0
-        self.padoverlay = None
-        if self.args['padoverlay']:
-            self.padoverlay = SnesPadDrawing(name='SUPER SYNC')
+        self.pad_overlay = SnesPadDrawing(name='SUPER SYNC') if draw_pad else None
 
         # limit FPS
         self.fps = self.emu.get_av_info()['fps']
@@ -85,8 +78,8 @@ class SuperOpti(Game):
         game_img = pygame.transform.scale(self.framebuffer, new_size)
 
         # draw the gamepad underneath if enabled
-        if self.padoverlay is not None:
-            pad_img = self.padoverlay.Draw(self.pad)
+        if self.pad_overlay is not None:
+            pad_img = self.pad_overlay.Draw(self.pad)
             joined = pygame.Surface(self.ScreenSize())
             joined.blit(game_img, (0, 0))
             joined.blit(pad_img, (3, game_img.get_height()))
@@ -110,7 +103,7 @@ class SuperOpti(Game):
 
         if self.padoverlay is not None:
             w = max(256, w)
-            h += self.padoverlay.frame.get_height()
+            h += self.pad_overlay.frame.get_height()
         return w, h
 
     def PeekMemoryRegion(self, offset, length):
