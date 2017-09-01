@@ -7,14 +7,10 @@ from skeleton_solver import Brain
 pygame.joystick.init()  # hack to allow argument validation
 joylist = [pygame.joystick.Joystick(i).get_name() for i in range(pygame.joystick.get_count())]
 
-def get_default_joystick():
-    if joylist:
-        return joylist[0]
-    return None
-
-defaultargs = {'joynum': get_default_joystick(),
+defaultargs = {'joynum': joylist[0],
                'keyhat': 'wsad',
                'keybuttons': 'klji1056'}
+
 
 # lambda x: x == 0 or (x > 0 and x < pygame.joystick.get_count()) }
 
@@ -27,7 +23,7 @@ class Sapiens(Brain):
         joynum = self.args['joynum']
         if type(joynum) == str:
             joynum = joylist.index(joynum)
-        if joynum and joynum >= 0:
+        if joynum >= 0:
             self.joy = pygame.joystick.Joystick(joynum)
             self.joy.init()
             print('Sapiens:', self.joy.get_name())
