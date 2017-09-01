@@ -1,13 +1,14 @@
 import ast
 import asyncio
 import pprint
+import pygame
 import queue
 import threading
 import websockets
 
 from sapiens import Sapiens
 from sync import game_sync_classes
-
+import visualization.textlog
 
 class Andalite(Sapiens):
     name = 'andalite'
@@ -20,12 +21,16 @@ class Andalite(Sapiens):
         game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
         if game_sync_class is not None:
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
+        self.window = pygame.Surface(self.ScreenSize())
 
     def Step(self):
         if self.game_sync is not None:
             self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
 
-        return Sapiens.Step(self)
+        surf, = Sapiens.Step(self)
+        self.window.blit(surf, (0, 0))
+        self.window.blit(visualization.textlog.draw(), (surf.get_width(), 0))
+        return self.window,
 
     def getReceivedData(self):
         try:
@@ -37,6 +42,11 @@ class Andalite(Sapiens):
     def sendData(self, data):
         if data:
             self.telepathy.outboundMemoryReads.put_nowait(str(data))
+
+    def ScreenSize(self):
+        w, h = self.game.ScreenSize()
+        w += visualization.textlog.draw().get_width()
+        return w, h
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()

@@ -1,18 +1,26 @@
 import pygame
 
-current_frame = 0
 text_log = []
-text_log_surface = pygame.Surface((250, 64))
+text_log_surface = pygame.Surface((512, 512))
 
 pygame.font.init()
-log_font = pygame.font.Font(None, 10)
+log_font = pygame.font.Font("visualization/opti.pcf", 16)
 
-def get_surface
+line_height = 11
+max_lines_to_show = text_log_surface.get_height() // line_height
 
-def log_text(text)
-    text_log.append((current_frame, text))
-def draw()
-    text_lines = [string for (added_in_frame, string) in text_log].reverse()
-    text_log_surface.blit(log_font.render("\n".join(text_lines), True, black), (0,0))
+color_fg = (150, 150, 150)
 
-    current_frame += 1
+def blit_text_to_surface():
+    for i in range(min(len(text_log), max_lines_to_show)):
+        text_log_surface.blit(log_font.render(text_log[i], True, color_fg), (4, i * line_height + 4))
+
+def log_text(text):
+    text_log.append(text)
+    if len(text_log) > max_lines_to_show:
+        text_log.pop(0)
+    blit_text_to_surface()
+
+
+def draw():
+    return text_log_surface

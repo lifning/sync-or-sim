@@ -9,10 +9,10 @@ class PokemonRedBlueSync(IGameSync):
             (0xd009, 0x27), # active pokemon in battle
             (0xd158, 0x19e), # player & party
             (0xcc2f, 1) # index of pokemon currently sent out
-        ])
+        ], "party")
 
         # sync items separately since they're less sensitive.
-        self.items = SimpleOnChangeStrategy([(0xd31d, 0x2c)])
+        self.items = SimpleOnChangeStrategy([(0xd31d, 0x2c)], "items & money")
 
     def on_emulator_step(self, received_data):
         return self.party.on_emulator_step(self, received_data) + self.items.on_emulator_step(self, received_data)
