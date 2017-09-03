@@ -4,27 +4,21 @@ import pygame
 
 from skeleton_solver import Brain
 
-pygame.joystick.init()  # hack to allow argument validation
-joylist = [pygame.joystick.Joystick(i).get_name() for i in range(pygame.joystick.get_count())]
+pygame.joystick.init()
+joylist = [pygame.joystick.Joystick(i).get_name()
+           for i in range(pygame.joystick.get_count())] or [-1]
 
-defaultargs = {'joynum': joylist[0],
-               'keyhat': 'wsad',
-               'keybuttons': 'klji1056'}
-
-
-# lambda x: x == 0 or (x > 0 and x < pygame.joystick.get_count()) }
 
 class Sapiens(Brain):
     name = 'sapiens'
 
-    def __init__(self, game, **kwargs):
-        Brain.__init__(self, game, defaultargs, **kwargs)
+    def __init__(self, game, *_, joypad=joylist[0], dir_keys='wsad', btn_keys='klji1056'):
+        Brain.__init__(self, game)
 
-        joynum = self.args['joynum']
-        if type(joynum) == str:
-            joynum = joylist.index(joynum)
-        if joynum >= 0:
-            self.joy = pygame.joystick.Joystick(joynum)
+        if type(joypad) == str:
+            joypad = joylist.index(joypad)
+        if joypad >= 0:
+            self.joy = pygame.joystick.Joystick(joypad)
             self.joy.init()
             print('Sapiens:', self.joy.get_name())
 
@@ -45,15 +39,13 @@ class Sapiens(Brain):
                         {1: 'up', -1: 'down'}]
 
         self.key_map = {}
-        keyhat = self.args['keyhat']
-        for i in range(len(keyhat)):
+        for i in range(len(dir_keys)):
             s = 'hat0_{}'.format(UDLR[i])
             if s in map:
-                self.key_map[ord(keyhat[i])] = map[s]
-        keybuttons = self.args['keybuttons']
-        for i in range(len(keybuttons)):
+                self.key_map[ord(dir_keys[i])] = map[s]
+        for i in range(len(btn_keys)):
             if i in map:
-                self.key_map[ord(keybuttons[i])] = map[i]
+                self.key_map[ord(btn_keys[i])] = map[i]
 
     def Step(self):
         self.game.Input(self.pad)

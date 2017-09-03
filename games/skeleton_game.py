@@ -10,9 +10,8 @@ ymax = 200  # fallback height of the screen
 class Game:
     name = 'unnamed game'
 
-    def __init__(self, default_args=None, **kwargs):
-        self.args = (default_args or {}).copy()
-        self.args.update(kwargs)
+    def __init__(self):
+        pass
 
     # return a copy of the "screen" for visualization
     def Draw(self):

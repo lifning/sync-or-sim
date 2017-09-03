@@ -2,10 +2,8 @@
 class Brain:
     name = 'unnamed solver'
 
-    def __init__(self, game, default_args=None, **kwargs):
+    def __init__(self, game):
         self.game = game
-        self.args = (default_args or {}).copy()
-        self.args.update(kwargs)
 
     # this should 'yield' pygame surfaces throughout execution, or return an iterable of them
     def Step(self):
