@@ -12,7 +12,7 @@ class SuperOpti(Game):
     name = 'superopti'
 
     def __init__(self, *_, libretro='data/gambatte_libretro.dll', rom='data/pokeblue.gb',
-                 state='data/pokeblue.state', draw_pad=True):
+                 state='data/pokeblue.state', draw_pad=True, scalefactor=1):
         Game.__init__(self)
 
         # load the libretro core and feed the emulator a ROM
@@ -46,7 +46,7 @@ class SuperOpti(Game):
         self.clock = pygame.time.Clock()
 
         #scaling
-        self.scalefactor = int(self.args['scalefactor'])
+        self.scalefactor = scalefactor
 
     def HumanInputs(self):
         return {'hat0_up': 0b000000010000,
@@ -74,8 +74,10 @@ class SuperOpti(Game):
         if self.framebuffer is None or not pygame.display.get_active():
             return None
 
-        new_size = tuple([size * self.scalefactor for size in self.framebuffer.get_size()])
-        game_img = pygame.transform.scale(self.framebuffer, new_size)
+        game_img = self.framebuffer
+        if self.scalefactor != 1:
+            new_size = tuple([size * self.scalefactor for size in self.framebuffer.get_size()])
+            game_img = pygame.transform.scale(game_img, new_size)
 
         # draw the gamepad underneath if enabled
         if self.pad_overlay is not None:
@@ -101,7 +103,7 @@ class SuperOpti(Game):
         w *= self.scalefactor
         h *= self.scalefactor
 
-        if self.padoverlay is not None:
+        if self.pad_overlay is not None:
             w = max(256, w)
             h += self.pad_overlay.frame.get_height()
         return w, h

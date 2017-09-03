@@ -12,7 +12,7 @@ joylist = [pygame.joystick.Joystick(i).get_name()
 class Sapiens(Brain):
     name = 'sapiens'
 
-    def __init__(self, game, *_, joypad=joylist[0], dir_keys='wsad', btn_keys='klji1056'):
+    def __init__(self, game, joypad=joylist[0], dir_keys='wsad', btn_keys='klji1056', *_):
         Brain.__init__(self, game)
 
         if type(joypad) == str:

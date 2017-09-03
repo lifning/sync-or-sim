@@ -14,7 +14,7 @@ class Andalite(Sapiens):
     name = 'andalite'
     lastSent = {}
 
-    def __init__(self, game, *_, server='ws://localhost:8765', **kwargs):
+    def __init__(self, game, server='ws://localhost:8765', *_, **kwargs):
         Sapiens.__init__(self, game, **kwargs)
         self.telepathy = Telepathy(server)
         # get sync class for the currently loaded game.
