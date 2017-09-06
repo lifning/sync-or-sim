@@ -3,3 +3,4 @@
 .idea/tasks.xml
 .idea/workspace.xml
 *.pickle
+output/*.state
