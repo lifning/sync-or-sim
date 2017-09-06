@@ -1,4 +1,6 @@
 from sync.interfaces import IStrategy
+
+
 class SimpleOnChangeStrategy(IStrategy):
     last_seen = {}
 
@@ -6,7 +8,7 @@ class SimpleOnChangeStrategy(IStrategy):
     # and applies data immediately when it is received (before collecting data to send)
     def __init__(self, offset_length_pairs):
         self.offset_length_pairs = offset_length_pairs
-        self.interesting_offsets = [offset for offset, _ in offset_length_pairs] # just a list of all the offsets
+        self.interesting_offsets = [tup[0] for tup in offset_length_pairs]
 
     def on_emulator_step(self, caller, received_data):
         self.write_received_data_to_memory(caller, received_data)
@@ -17,25 +19,34 @@ class SimpleOnChangeStrategy(IStrategy):
         # this sends all the interesting offsets' data, or none, never a partial subset.
         change_seen = False
         data_to_send = []
-        for offset, length in self.offset_length_pairs:
-            d = {'offset': offset, 'data': caller.read_memory(offset, length)}
+        for tup in self.offset_length_pairs:
+            offset, length = tup[0:2]
+            bank_switch = tup[2] if len(tup) == 3 else 0
+            d = {'offset': offset,
+                 'data': caller.read_memory(offset, length, bank_switch),
+                 'bank_switch': bank_switch,
+                 }
             data_to_send.append(d)
 
             # compare this with the last seen version
-            last_seen_data = self.last_seen.get(offset)
+            key = (offset, bank_switch)
+            last_seen_data = self.last_seen.get(key)
             if last_seen_data != d:
                 change_seen = True
-                self.last_seen[offset] = d # write it back
+                self.last_seen[key] = d  # write it back
 
         if change_seen:
             return data_to_send
-        return [] # no change? send nothing.
+        return []  # no change? send nothing.
 
     def write_received_data_to_memory(self, caller, received_data):
         for data in received_data:
             offset = data.get('offset')
             if offset in self.interesting_offsets:
                 mem = data.get('data')
-                caller.write_memory(offset, mem)
-                self.last_seen[offset] = data # also update last_seen so we don't send back something that we just wrote.
+                bank_switch = data.get('bank_switch', 0)
+                caller.write_memory(offset, mem, bank_switch)
+                # also update last_seen so we don't send back something that we just wrote.
+                key = (offset, bank_switch)
+                self.last_seen[key] = data
 
