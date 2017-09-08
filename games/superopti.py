@@ -76,8 +76,11 @@ class SuperOpti(Game):
         if self.framebuffer is None or not pygame.display.get_active():
             return None
 
-        new_size = tuple([size * self.scale_factor for size in self.framebuffer.get_size()])
-        game_img = pygame.transform.scale(self.framebuffer, new_size)
+        game_img = self.framebuffer
+
+        if self.scale_factor != 1:
+            new_size = tuple(size * self.scale_factor for size in self.framebuffer.get_size())
+            game_img = pygame.transform.scale(self.framebuffer, new_size)
 
         # draw the gamepad underneath if enabled
         if self.pad_overlay is not None:
