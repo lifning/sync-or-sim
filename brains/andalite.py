@@ -22,7 +22,8 @@ class Andalite(Sapiens):
         self.game_sync = None
         if game_sync_class is not None:
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
-        visualization.textlog.init_text_log_surface(self.game.ScreenSize())
+
+        visualization.textlog.init_text_log_surface((256, self.game.ScreenSize()[1]))
         self.window = pygame.Surface(self.ScreenSize())
 
     def Step(self):
