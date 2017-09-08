@@ -43,6 +43,7 @@ class SuperOpti(Game):
         # limit FPS
         self.fps = self.emu.get_av_info()['fps']
         self.clock = pygame.time.Clock()
+        self.limit_fps = True
 
     def HumanInputs(self):
         return {'hat0_up': 0b000000010000,
@@ -89,7 +90,8 @@ class SuperOpti(Game):
 
         # run for the specified number of frames on that pad state
         self.emu.run(1)
-        self.clock.tick(self.fps)
+        if self.limit_fps:
+            self.clock.tick(self.fps)
 
     def ScreenSize(self):
         w, h = self.framebuffer.get_size()

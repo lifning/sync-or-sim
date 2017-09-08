@@ -12,7 +12,8 @@ joylist = [pygame.joystick.Joystick(i).get_name()
 class Sapiens(Brain):
     name = 'sapiens'
 
-    def __init__(self, game, *_, joypad=joylist[0], dir_keys='wsad', btn_keys='klji1056'):
+    def __init__(self, game, *_, joypad=joylist[0], dir_keys='wsad', btn_keys='klji1056',
+                 state_path='output/{name}.state'):
         Brain.__init__(self, game)
 
         if type(joypad) == str:
@@ -47,6 +48,8 @@ class Sapiens(Brain):
             if i in map:
                 self.key_map[ord(btn_keys[i])] = map[i]
 
+        self.state_path = state_path.format(name=self.game.name.lower())
+
     def Step(self):
         self.game.Input(self.pad)
         self.input_log.append(self.pad)
@@ -54,8 +57,10 @@ class Sapiens(Brain):
         return self.game.Draw(),
 
     def Event(self, evt):
-        imap = self.input_map
-        kmap = self.key_map
+        self._event_pad(evt)
+        self._event_hotkeys(evt)
+
+    def _event_pad(self, evt):
         if evt.type == pygame.JOYHATMOTION:
             hat = evt.value
             lut = self.hat_lut
@@ -63,26 +68,36 @@ class Sapiens(Brain):
             for i in (0, 1):
                 if hat[i] in lut[i]:
                     name = 'hat0_{}'.format(lut[i][hat[i]])
-                    if name in imap:
-                        self.pad |= imap[name]
+                    if name in self.input_map:
+                        self.pad |= self.input_map[name]
         elif evt.type == pygame.JOYBUTTONDOWN:
-            if evt.button in imap:
-                self.pad |= imap[evt.button]
+            if evt.button in self.input_map:
+                self.pad |= self.input_map[evt.button]
         elif evt.type == pygame.JOYBUTTONUP:
-            if evt.button in imap:
-                self.pad &= ~imap[evt.button]
+            if evt.button in self.input_map:
+                self.pad &= ~self.input_map[evt.button]
         elif evt.type == pygame.KEYDOWN:
-            if evt.key in kmap:
-                self.pad |= kmap[evt.key]
+            if evt.key in self.key_map:
+                self.pad |= self.key_map[evt.key]
         elif evt.type == pygame.KEYUP:
-            if evt.key in kmap:
-                self.pad &= ~kmap[evt.key]
+            if evt.key in self.key_map:
+                self.pad &= ~self.key_map[evt.key]
+
+    def _event_hotkeys(self, evt):
+        if evt.type == pygame.KEYDOWN:
+            if evt.key == pygame.K_F2:
+                with open(self.state_path, 'wb') as f:
+                    f.write(self.game.Freeze())
+            elif evt.key == pygame.K_F4:
+                with open(self.state_path, 'rb') as f:
+                    self.game.Thaw(f.read())
+            elif evt.key == pygame.K_SPACE:
+                self.game.limit_fps = False
+        elif evt.type == pygame.KEYUP:
+            if evt.key == pygame.K_SPACE:
+                self.game.limit_fps = True
 
     def Path(self):
         return self.input_log
-
-    def Victory(self):
-        return False
-
 
 LoadedBrain = Sapiens

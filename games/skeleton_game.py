@@ -47,5 +47,4 @@ class Game:
     def Sound(self):
         return 0, 0
 
-
 LoadedGame = Game
