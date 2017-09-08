@@ -6,5 +6,6 @@ gameSyncMap = {
     'POKEMON RED': pkmnrb.PokemonRedBlueSync
 }
 
+
 def get_game_sync_class(gameName):
     return gameSyncMap.get(gameName)
