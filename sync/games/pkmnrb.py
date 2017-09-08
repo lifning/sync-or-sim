@@ -10,10 +10,10 @@ class PokemonRedBlueSync(IGameSync):
             (0xd009, 0x27),  # active pokemon in battle
             (0xd158, 0x19e),  # player & party
             (0xcc2f, 1),  # index of pokemon currently sent out
-        ])
+        ], "party")
 
         # sync items separately since they're less sensitive.
-        self.items = SimpleOnChangeStrategy([(0xd31d, 0x2c)])
+        self.items = SimpleOnChangeStrategy([(0xd31d, 0x2c)], "items & money")
 
         box_size = 0x462
         self.boxes = SimpleOnChangeStrategy([
@@ -25,7 +25,7 @@ class PokemonRedBlueSync(IGameSync):
             (0xa000 + (box_size * box), box_size, bank)
             for box in range(6)
             for bank in (2, 3)
-        ])
+        ], "boxes")
 
     def fix_checksums(self):
         """Fix checksums *locally* (don't send to remote users for whom it might not be valid)"""

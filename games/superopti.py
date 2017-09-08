@@ -5,13 +5,14 @@ import pygame
 import py_retro as retro
 from skeleton_game import Game
 from visualization.snespad import SnesPadDrawing
+import visualization.textlog
 
 
 class SuperOpti(Game):
     name = 'superopti'
 
     def __init__(self, *_, libretro='data/gambatte_libretro.dll', rom='data/pokeblue.gb',
-                 state='data/pokeblue.state', draw_pad=True):
+                 state='data/pokeblue.state', draw_pad=True, scale_factor=2):
         Game.__init__(self)
 
         # load the libretro core and feed the emulator a ROM
@@ -45,6 +46,10 @@ class SuperOpti(Game):
         self.clock = pygame.time.Clock()
         self.limit_fps = True
 
+        #scaling
+        self.scale_factor = int(scale_factor)
+
+
     def HumanInputs(self):
         return {'hat0_up': 0b000000010000,
                 'hat0_down': 0b000000100000,
@@ -73,6 +78,10 @@ class SuperOpti(Game):
 
         game_img = self.framebuffer
 
+        if self.scale_factor != 1:
+            new_size = tuple(size * self.scale_factor for size in self.framebuffer.get_size())
+            game_img = pygame.transform.scale(self.framebuffer, new_size)
+
         # draw the gamepad underneath if enabled
         if self.pad_overlay is not None:
             pad_img = self.pad_overlay.Draw(self.pad)
@@ -95,6 +104,9 @@ class SuperOpti(Game):
 
     def ScreenSize(self):
         w, h = self.framebuffer.get_size()
+        w *= self.scale_factor
+        h *= self.scale_factor
+
         if self.pad_overlay is not None:
             w = max(256, w)
             h += self.pad_overlay.frame.get_height()
