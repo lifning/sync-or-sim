@@ -18,7 +18,7 @@ class Andalite(Sapiens):
         Sapiens.__init__(self, game, **kwargs)
         self.telepathy = Telepathy(server)
         # get sync class for the currently loaded game.
-        game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo['name'])
+        game_sync_class = game_sync_classes.get_game_sync_class(game.emu.gameinfo.get('name'))
         self.game_sync = None
         if game_sync_class is not None:
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
