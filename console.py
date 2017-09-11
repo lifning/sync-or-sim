@@ -30,7 +30,11 @@ def add_constructor_params(parser, cls):
 
 
 def filter_args(args, cls):
-    return dict((k, v) for k, v in args.items() if k in inspect.signature(cls.__init__).parameters)
+    value = dict((k, v) for k, v in args.items() if k in inspect.signature(cls.__init__).parameters)
+    for base in cls.__bases__:
+        if base is not object:
+            value.update(filter_args(args, base))
+    return value
 
 
 def main():

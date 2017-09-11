@@ -17,7 +17,10 @@ class Sapiens(Brain):
         Brain.__init__(self, game)
 
         if type(joypad) == str:
-            joypad = joylist.index(joypad)
+            if joypad.isdigit():
+                joypad = int(joypad)
+            else:
+                joypad = joylist.index(joypad)
         if joypad >= 0:
             self.joy = pygame.joystick.Joystick(joypad)
             self.joy.init()

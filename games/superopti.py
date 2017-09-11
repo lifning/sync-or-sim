@@ -17,7 +17,7 @@ class SuperOpti(Game):
 
         # load the libretro core and feed the emulator a ROM
         self.emu = retro.core.EmulatedSystem(libretro)
-        self.emu.load_game_normal(open(rom, 'rb').read())
+        self.emu.load_game_normal(open(rom, 'rb').read(), path=rom)
         self.name = self.emu.name
 
         # load a starting state if one was provided
