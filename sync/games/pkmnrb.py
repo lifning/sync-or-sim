@@ -1,4 +1,4 @@
-from sync.interfaces import IGameSync
+from sync.primitives import IGameSync
 from sync.strategies.simple_onchange import SimpleOnChangeStrategy
 
 
@@ -6,17 +6,17 @@ class PokemonRedBlueSync(IGameSync):
     def __init__(self, send_data_callback, apply_data_callback):
         IGameSync.__init__(self, send_data_callback, apply_data_callback)
 
-        self.party = SimpleOnChangeStrategy([
+        self.strats.append(SimpleOnChangeStrategy([
             (0xd009, 0x27),  # active pokemon in battle
             (0xd158, 0x19e),  # player & party
             (0xcc2f, 1),  # index of pokemon currently sent out
-        ], "party")
+        ], "party"))
 
         # sync items separately since they're less sensitive.
-        self.items = SimpleOnChangeStrategy([(0xd31d, 0x2c)], "items & money")
+        self.strats.append(SimpleOnChangeStrategy([(0xd31d, 0x2c)], "items & money"))
 
         box_size = 0x462
-        self.boxes = SimpleOnChangeStrategy([
+        self.strats.append(SimpleOnChangeStrategy([
             (0xa84c, 1, 1),  # selected box index - FIXME: not sufficient! there's a WRAM shadow too
             (0xb0c0, box_size, 1),  # current box contents
             (0xda80, box_size),  # work RAM copy of current box contents
@@ -25,7 +25,7 @@ class PokemonRedBlueSync(IGameSync):
             (0xa000 + (box_size * box), box_size, bank)
             for box in range(6)
             for bank in (2, 3)
-        ], "boxes")
+        ], "boxes"))
 
     def fix_checksums(self):
         """Fix checksums *locally* (don't send to remote users for whom it might not be valid)"""
@@ -41,9 +41,7 @@ class PokemonRedBlueSync(IGameSync):
         # TODO: the checksums in banks 2 and 3, if necessary? are they the same alg?
 
     def on_emulator_step(self, received_data):
-        updates = (self.party.on_emulator_step(self, received_data) +
-                   self.items.on_emulator_step(self, received_data) +
-                   self.boxes.on_emulator_step(self, received_data))
+        updates = super().on_emulator_step(received_data)
         if received_data:
             self.fix_checksums()
         return updates

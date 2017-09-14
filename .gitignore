@@ -1,4 +1,5 @@
 *.gb
+*.gen
 *.pyc
 .idea/tasks.xml
 .idea/workspace.xml

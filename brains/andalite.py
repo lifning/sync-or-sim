@@ -1,14 +1,14 @@
-import ast
 import asyncio
-import pprint
 import pygame
 import queue
 import threading
 import websockets
+import zlib
 
 from sapiens import Sapiens
 from sync import game_sync_classes
 import visualization.textlog
+
 
 class Andalite(Sapiens):
     name = 'andalite'
@@ -37,19 +37,19 @@ class Andalite(Sapiens):
 
     def getReceivedData(self):
         try:
-            data = self.telepathy.inboundMemoryWrites.get_nowait()
-            return data
+            return zlib.decompress(self.telepathy.inboundMemoryWrites.get_nowait())
         except queue.Empty:
             return []
 
     def sendData(self, data):
         if data:
-            self.telepathy.outboundMemoryReads.put_nowait(str(data))
+            self.telepathy.outboundMemoryReads.put_nowait(zlib.compress(data))
 
     def ScreenSize(self):
         w, h = self.game.ScreenSize()
         w += visualization.textlog.draw().get_width()
         return w, h
+
 
 class Telepathy:
     inboundMemoryWrites = queue.Queue()
@@ -79,18 +79,15 @@ class Telepathy:
 
     async def messageConsumer(self, websocket):
         while True:
-            message = await websocket.recv()
-            data = ast.literal_eval(message)
-            print("received data:")
-            pprint.pprint(data)
+            data = await websocket.recv()
+            # print("received data: {}".format(data))
             self.inboundMemoryWrites.put_nowait(data)
 
     async def messageProducer(self, websocket):
         while True:
             try:
                 message = await asyncio.get_event_loop().run_in_executor(None, self.bgThreadGetOutboundMemoryReads)
-                print("sending a message: {}".format(message))
-                pprint.pprint(message)
+                # print("sending a message: {}".format(message))
                 await websocket.send(message)
             except queue.Empty:
                 pass
@@ -99,5 +96,6 @@ class Telepathy:
         timeoutSeconds = 3 # wait at most this many seconds, then call .get again
         # if we do not timeout here then the app will hang indefinitely when interrupted.
         return self.outboundMemoryReads.get(block=True, timeout=timeoutSeconds)
+
 
 LoadedBrain = Andalite
