@@ -44,7 +44,7 @@ class Andalite(Sapiens):
 
     def sendData(self, data):
         if data:
-            self.telepathy.outboundMemoryReads.put_nowait(str(data))
+            self.telepathy.queueMessageToSend(data)
 
     def ScreenSize(self):
         w, h = self.game.ScreenSize()
@@ -54,12 +54,23 @@ class Andalite(Sapiens):
 class Telepathy:
     inboundMemoryWrites = queue.Queue()
     outboundMemoryReads = queue.Queue()
+    currentEventNumber = 0
 
     def __init__(self, server):
         self.server = server
         thread = threading.Thread(target=self.threadMain, args=())
         thread.daemon = True
         thread.start()
+
+    def queueMessageToSend(self, data):
+        self.currentEventNumber += 1
+
+        # wrap with metadata
+        message = {
+            "data": data,
+            "event_number": self.currentEventNumber
+        }
+        self.outboundMemoryReads.put_nowait(str(message))
 
     def threadMain(self):
         loop = asyncio.new_event_loop()
@@ -79,18 +90,21 @@ class Telepathy:
 
     async def messageConsumer(self, websocket):
         while True:
-            message = await websocket.recv()
-            data = ast.literal_eval(message)
-            print("received data:")
-            pprint.pprint(data)
-            self.inboundMemoryWrites.put_nowait(data)
+            messageString = await websocket.recv()
+            message = ast.literal_eval(messageString)
+            num = message.get('event_number', -1)
+            if num > self.currentEventNumber:
+                self.currentEventNumber = num
+                visualization.textlog.log_text(f"Accepted event with num {num}")
+                self.inboundMemoryWrites.put_nowait(message.get('data'))
+            else:
+                visualization.textlog.log_text(f"Rejected event with num {num} < {self.currentEventNumber}")
 
     async def messageProducer(self, websocket):
         while True:
             try:
                 message = await asyncio.get_event_loop().run_in_executor(None, self.bgThreadGetOutboundMemoryReads)
-                print("sending a message: {}".format(message))
-                pprint.pprint(message)
+                visualization.textlog.log_text(f"Sending event with num {self.currentEventNumber}")
                 await websocket.send(message)
             except queue.Empty:
                 pass
