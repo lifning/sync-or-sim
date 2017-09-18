@@ -55,8 +55,7 @@ class Driver:
         self.game_args = game_args
         self.brain_args = brain_args
 
-        self.win_size = self.brain.ScreenSize()
-        self.screen = pygame.display.set_mode(self.win_size)
+        pygame.display.init()
 
     def Run(self):
         running = True
@@ -72,7 +71,7 @@ class Driver:
                         running = False
                 # if relevant, draw the screen
                 if surf is not None:
-                    self.screen.blit(surf, (0, 0))
+                    pygame.display.get_surface().blit(surf, (0, 0))
                 pygame.display.flip()
             pygame.display.flip()
 
@@ -90,4 +89,4 @@ class Driver:
         pickle.dump(result, open(output, 'wb'))
 
         if screenshot is not None:
-            pygame.image.save(self.screen, screenshot)
+            pygame.image.save(pygame.display.get_surface(), screenshot)

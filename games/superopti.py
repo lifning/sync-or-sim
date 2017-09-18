@@ -27,9 +27,15 @@ class SuperOpti(Game):
         except IOError:
             pass
 
+        # scaling
+        self.scale_factor = int(scale_factor)
+
+        # showing what buttons are active
+        self.pad = 0
+        self.pad_overlay = SnesPadDrawing(name='SUPER SYNC') if draw_pad else None
+
         # register rendering and input-reading callbacks
-        self.framebuffer = pygame.Surface(self.emu.get_av_info()['base_size'])
-        retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
+        self._register_video_refresh()
         # disabled until there's a decent audio implementation
         # retro.portaudio_audio.set_audio_sample_internal(self.emu)
         retro.simple_input.set_input_internal(self.emu)
@@ -37,18 +43,17 @@ class SuperOpti(Game):
         # unplug player 2 controller so we don't get twice as many input state callbacks
         self.emu.set_controller_port_device(1, retro.DEVICE_NONE)
 
-        # showing what buttons are active
-        self.pad = 0
-        self.pad_overlay = SnesPadDrawing(name='SUPER SYNC') if draw_pad else None
-
         # limit FPS
-        self.fps = self.emu.get_av_info()['fps']
         self.clock = pygame.time.Clock()
         self.limit_fps = True
 
-        #scaling
-        self.scale_factor = int(scale_factor)
-
+    def _register_video_refresh(self):
+        if self.emu.av_info_changed:
+            av_info = self.emu.get_av_info()
+            print(av_info)
+            self.fps = av_info['fps']
+            self.framebuffer = pygame.Surface(av_info['base_size'])
+            retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
 
     def HumanInputs(self):
         return {'hat0_up': 0b000000010000,
@@ -77,6 +82,9 @@ class SuperOpti(Game):
             return None
 
         game_img = self.framebuffer
+
+        # check for runtime mode-setting
+        self._register_video_refresh()
 
         if self.scale_factor != 1:
             new_size = tuple(size * self.scale_factor for size in self.framebuffer.get_size())
@@ -110,6 +118,7 @@ class SuperOpti(Game):
         if self.pad_overlay is not None:
             w = max(256, w)
             h += self.pad_overlay.frame.get_height()
+
         return w, h
 
     def PeekMemoryRegion(self, offset, length, bank_switch):

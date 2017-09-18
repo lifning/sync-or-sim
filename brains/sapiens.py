@@ -52,10 +52,17 @@ class Sapiens(Brain):
                 self.key_map[ord(btn_keys[i])] = map[i]
 
         self.state_path = state_path.format(name=self.game.name.lower())
+        self._current_game_res = None
 
     def Step(self):
         self.game.Input(self.pad)
         self.input_log.append(self.pad)
+
+        game_res = self.game.ScreenSize()
+        if game_res != self._current_game_res:
+            self._current_game_res = game_res
+            pygame.display.set_mode(self.ScreenSize())
+
         pygame.display.set_caption('{}'.format(self.game.name))
         return self.game.Draw(),
 
@@ -102,5 +109,6 @@ class Sapiens(Brain):
 
     def Path(self):
         return self.input_log
+
 
 LoadedBrain = Sapiens
