@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="lifning">
     <words>
+      <w>addr</w>
       <w>argtypes</w>
       <w>bitmasks</w>
       <w>compat</w>
@@ -17,9 +18,13 @@
       <w>opti</w>
       <w>overscan</w>
       <w>pygame</w>
+      <w>respawn</w>
       <w>screenshot</w>
       <w>snes</w>
+      <w>strat</w>
+      <w>strats</w>
       <w>superopti</w>
+      <w>ulong</w>
       <w>unserialize</w>
       <w>wram</w>
       <w>wsad</w>
