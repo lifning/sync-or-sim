@@ -3,9 +3,6 @@ import visualization.textlog
 
 
 class SimpleOnChangeStrategy(IStrategy):
-    last_seen = {}  # store synchronized received memory & keep track of memory we have sent
-    received_unsynced = {}  # store unsynchronized received memory
-
     # A strategy that watches emulator memory & sends it when a change is detected
     # and applies data immediately when it is received (before collecting data to send)
     def __init__(self, offset_length_pairs, label):
@@ -16,6 +13,9 @@ class SimpleOnChangeStrategy(IStrategy):
         self.buffer_size = sum(x.serializer.size for x in self.addresses)
         self.buffer = bytearray(self.buffer_size)
         self.label = label
+        self.last_seen = {}  # store synchronized received memory & keep track of memory we have sent
+        self.received_unsynced = {}  # store unsynchronized received memory
+
 
     def on_emulator_step(self, caller, received_data):
         self.write_received_data_to_memory(caller, received_data)
@@ -59,13 +59,13 @@ class SimpleOnChangeStrategy(IStrategy):
                     self.received_unsynced[key] = mem
             visualization.textlog.log_text(f'Received {self.label}')
 
-    def get_last_received_value(self, offset, length, bank_switch):
-        value = self.get_value_from_received_map(self.received_unsynced, offset, length, bank_switch)
+    def get_last_received_value(self, offset, length, bank_switch=0):
+        value = self._get_value_from_received_map(self.received_unsynced, offset, length, bank_switch)
         if value is None:
-            value = self.get_value_from_received_map(self.last_seen, offset, length, bank_switch)
+            value = self._get_value_from_received_map(self.last_seen, offset, length, bank_switch)
         return value
 
-    def get_value_from_received_map(self, received_map, offset, length, bank_switch):
+    def _get_value_from_received_map(self, received_map, offset, length, bank_switch):
         for received_map_range in received_map.keys():
             if bank_switch == received_map_range[1] and offset >= received_map_range[0]:
                 # bank and start offset matches, figure out what the end offset is of the requested region

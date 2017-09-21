@@ -25,7 +25,6 @@ class Sonic2Sync(IGameSync):
             MirroredAddress(0x18, 0xb028, 0xb068),  # other sonic/tails-specific object fields
             MirroredAddress(0x2, 0xf604, 0xf606),  # shadow gamepad, need ROM patched to not clobber
             MirroredAddress(0x2, 0xf602, 0xf66a),  # shadow gamepad (logical)
-            MirroredAddress(0x2, 0xf602, 0xf66a),  # shadow gamepad (logical)
             MirroredAddress(0x2, 0xfe10, should_write=False),  # zone & act number
         ], "sonic -> tails")
         self.strats.append(self.player_position_strategy)
@@ -43,13 +42,13 @@ class Sonic2Sync(IGameSync):
             self.time_in_respawning_state += 1
 
             # apply other player's position to you
-            other_player_pos = (self.player_position_strategy.get_last_received_value(0xb048, 0x10, 0))
+            other_player_pos = (self.player_position_strategy.get_last_received_value(0xb048, 0x10))
             self.write_memory(0xb008, other_player_pos, 0)
             self.write_memory(0xb030, b'\x00\x78', 0)  # set invulnerability time
 
             held_keys = self.read_memory(0xf604, 1, 0)
 
-            # If you press a button and it's been enough fra, exit respawning state.
+            # If you press a button and it's been enough frames, exit respawning state.
             if held_keys != b'\x00' and self.time_in_respawning_state > RESPAWN_WAIT_TIME:
                 self.time_in_respawning_state = 0
                 self.life_state = LifeState.ALIVE
@@ -68,8 +67,7 @@ class Sonic2Sync(IGameSync):
     def on_emulator_step(self, received_data):
         # if the other player isn't in the same zone or act, change some state
         current_level = self.read_memory(0xfe10, 2, 0)
-        other_player_level = self.player_position_strategy.get_last_received_value(0xfe10, 2, 0)
-        visualization.textlog.log_text(f"y: {current_level} t: {other_player_level}")
+        other_player_level = self.player_position_strategy.get_last_received_value(0xfe10, 2)
         if current_level != other_player_level:
             if self.life_state == LifeState.RESPAWNING:
                 self.life_state = LifeState.ALIVE
