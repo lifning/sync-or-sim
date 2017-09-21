@@ -36,7 +36,7 @@ async def broadcastMessage(origin, message):
 def websocketServer():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    start_server = websockets.serve(handleClient, 'localhost', 8765)
+    start_server = websockets.serve(handleClient, '0.0.0.0', 8765)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()

@@ -43,13 +43,14 @@ class IStrategy:
 
 
 class MirroredAddress:
-    def __init__(self, size, source_offset, target_offset=None, source_bank=0, target_bank=None):
+    def __init__(self, size, source_offset, target_offset=None, source_bank=0, target_bank=None, should_write=True):
         self.size = size
         self.source_offset = source_offset
         self.target_offset = target_offset if target_offset is not None else source_offset
         self.source_bank = source_bank
         self.target_bank = target_bank if target_bank is not None else source_bank
-        self.serializer = struct.Struct(f'<LB{size}s')  # target offset, target bank, data
+        self.should_write = should_write
+        self.serializer = struct.Struct(f'<LB?{size}s')  # target offset, target bank, should_write, data
 
     def legacy_tuple(self):
         return self.source_offset, self.size, self.source_bank
