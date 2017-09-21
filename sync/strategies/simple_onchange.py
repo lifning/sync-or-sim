@@ -3,7 +3,8 @@ import visualization.textlog
 
 
 class SimpleOnChangeStrategy(IStrategy):
-    last_seen = {}
+    last_seen = {}  # store synchronized received memory & keep track of memory we have sent
+    received_unsynced = {}  # store unsynchronized received memory
 
     # A strategy that watches emulator memory & sends it when a change is detected
     # and applies data immediately when it is received (before collecting data to send)
@@ -27,7 +28,7 @@ class SimpleOnChangeStrategy(IStrategy):
         for addr in self.addresses:
             block = caller.read_memory(addr.source_offset, addr.size, addr.source_bank)
             addr.serializer.pack_into(self.buffer, produced,
-                                      addr.target_offset, addr.target_bank, block)
+                                      addr.target_offset, addr.target_bank, addr.should_write, block)
             produced += addr.serializer.size
 
             # compare this with the last seen version
@@ -46,11 +47,33 @@ class SimpleOnChangeStrategy(IStrategy):
         if received_data:
             consumed = 0
             for addr in self.addresses:
-                offset, bank_switch, mem = addr.serializer.unpack_from(received_data, consumed)
+                offset, bank_switch, should_write, mem = addr.serializer.unpack_from(received_data, consumed)
                 assert offset == addr.target_offset and bank_switch == addr.target_bank
                 consumed += addr.serializer.size
-                caller.write_memory(offset, mem, bank_switch)
-                # also update last_seen so we don't send back something that we just wrote.
                 key = (offset, bank_switch)
-                self.last_seen[key] = mem
+                if should_write:
+                    caller.write_memory(offset, mem, bank_switch)
+                    # also update last_seen so we don't send back something that we just wrote.
+                    self.last_seen[key] = mem
+                else:
+                    self.received_unsynced[key] = mem
             visualization.textlog.log_text(f'Received {self.label}')
+
+    def get_last_received_value(self, offset, length, bank_switch):
+        value = self.get_value_from_received_map(self.received_unsynced, offset, length, bank_switch)
+        if value is None:
+            value = self.get_value_from_received_map(self.last_seen, offset, length, bank_switch)
+        return value
+
+    def get_value_from_received_map(self, received_map, offset, length, bank_switch):
+        for received_map_range in received_map.keys():
+            if bank_switch == received_map_range[1] and offset >= received_map_range[0]:
+                # bank and start offset matches, figure out what the end offset is of the requested region
+                end_offset = offset + length
+                received_map_range_end_offset = received_map_range[0] + len(received_map[received_map_range])
+
+                if end_offset <= received_map_range_end_offset:
+                    # figure out internal offset
+                    internal_offset = offset - received_map_range[0]
+                    return received_map[received_map_range][internal_offset:internal_offset + length]
+        return None
