@@ -24,16 +24,21 @@ class Andalite(Sapiens):
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
 
         visualization.textlog.init_text_log_surface((256, self.game.ScreenSize()[1]))
-        self.window = pygame.Surface(self.ScreenSize())
 
     def Step(self):
         if self.game_sync is not None:
             self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
 
+        window = pygame.Surface(self.ScreenSize())
         surf, = Sapiens.Step(self)
-        self.window.blit(surf, (0, 0))
-        self.window.blit(visualization.textlog.draw(), (surf.get_width(), 0))
-        return self.window,
+        surf_w = 0
+
+        if surf is not None:
+            window.blit(surf, (0, 0))
+            surf_w = surf.get_width()
+
+        window.blit(visualization.textlog.draw(), (surf_w, 0))
+        return window,
 
     def getReceivedData(self):
         try:
