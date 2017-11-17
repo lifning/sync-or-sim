@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import pygame
+import pygame_sdl2 as pygame
 
 from skeleton_solver import Brain
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import pygame  # this level was removed from Donkey Kong for its NES release
+import pygame_sdl2 as pygame  # this level was removed from Donkey Kong for its NES release
 import pickle  # a sea cucumber left in brine
 import os  # generic brand cheerios
 import sys  # a nickname that refers to a female sybling

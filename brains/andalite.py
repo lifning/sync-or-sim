@@ -1,5 +1,5 @@
 import asyncio
-import pygame
+import pygame_sdl2 as pygame
 import queue
 import threading
 import websockets

@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import pygame
+import pygame_sdl2 as pygame
 from pickle import dumps, loads
 
 xmax = 320  # fallback width of the screen

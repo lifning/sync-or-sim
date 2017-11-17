@@ -1,4 +1,4 @@
-import pygame
+import pygame_sdl2 as pygame
 
 text_log = []
 

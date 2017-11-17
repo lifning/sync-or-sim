@@ -4,7 +4,7 @@ import wave
 from array import array
 
 import pickle
-import pygame
+import pygame_sdl2 as pygame
 
 from skeleton_solver import Brain
 
