@@ -61,10 +61,10 @@ class Sapiens(Brain):
         game_res = self.game.ScreenSize()
         if game_res != self._current_game_res:
             self._current_game_res = game_res
+            print(f'set mode {self.ScreenSize()}')
             pygame.display.set_mode(self.ScreenSize())
 
         pygame.display.set_caption('{}'.format(self.game.name))
-        return self.game.Draw(),
 
     def Event(self, evt):
         self._event_pad(evt)

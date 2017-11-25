@@ -61,18 +61,14 @@ class Driver:
         running = True
         print('Driver: Started at', time.asctime())
         while running:
-            # let the pathfinder take a step, get screens to show throughout
-            for surf in self.brain.Step():
-                # process events
-                for event in pygame.event.get():
-                    # pass events on to the pathfinder in case it takes input etc.
-                    self.brain.Event(event)
-                    if event.type == pygame.QUIT:
-                        running = False
-                # if relevant, draw the screen
-                if surf is not None:
-                    pygame.display.get_surface().blit(surf, (0, 0))
-                pygame.display.flip()
+            # process events
+            for event in pygame.event.get():
+                # pass events on to the pathfinder in case it takes input etc.
+                self.brain.Event(event)
+                if event.type == pygame.QUIT:
+                    running = False
+            self.brain.Step()
+            self.game.Draw()
             pygame.display.flip()
 
         print('Driver: Finished at', time.asctime())

@@ -29,16 +29,10 @@ class Andalite(Sapiens):
         if self.game_sync is not None:
             self.sendData(self.game_sync.on_emulator_step(self.getReceivedData()))
 
-        window = pygame.Surface(self.ScreenSize())
-        surf, = Sapiens.Step(self)
-        surf_w = 0
+        Sapiens.Step(self)
 
-        if surf is not None:
-            window.blit(surf, (0, 0))
-            surf_w = surf.get_width()
-
-        window.blit(visualization.textlog.draw(), (surf_w, 0))
-        return window,
+        surf_w = self.game.ScreenSize()[0]
+        pygame.display.get_surface().blit(visualization.textlog.draw(), (surf_w, 0))
 
     def getReceivedData(self):
         try:

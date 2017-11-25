@@ -12,8 +12,11 @@ class SuperOpti(Game):
     name = 'superopti'
 
     def __init__(self, *_, libretro='data/gambatte_libretro.dll', rom='data/pokeblue.gb',
-                 state='data/pokeblue.state', draw_pad=True, scale_factor=2):
+                 state='data/pokeblue.state', draw_pad=False, scale_factor=1):
         Game.__init__(self)
+
+        self.screen_size = (1, 1)
+        self.framebuffer = None
 
         # load the libretro core and feed the emulator a ROM
         self.emu = retro.core.EmulatedSystem(libretro)
@@ -26,9 +29,6 @@ class SuperOpti(Game):
                 self.Thaw(f.read())
         except IOError:
             pass
-
-        # scaling
-        self.scale_factor = int(scale_factor)
 
         # showing what buttons are active
         self.pad = 0
@@ -52,7 +52,11 @@ class SuperOpti(Game):
             av_info = self.emu.get_av_info()
             print(av_info)
             self.fps = av_info['fps']
-            self.framebuffer = pygame.Surface(av_info['base_size'])
+            self.screen_size = av_info['base_size']
+            self.framebuffer = None
+        screen = pygame.display.get_surface()
+        if self.framebuffer is None and screen is not None:
+            self.framebuffer = screen.subsurface(pygame.Rect((0, 0), self.screen_size))
             retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
 
     def HumanInputs(self):
@@ -78,20 +82,18 @@ class SuperOpti(Game):
     # only convert the screen from 16-bit format to RGB888 when we need it
     def Draw(self):
         # if we don't have something to draw, or if there's no point in drawing it
-        if self.framebuffer is None or not pygame.display.get_active():
-            return None
-
-        game_img = self.framebuffer
+        if not pygame.display.get_active():
+            return
 
         # check for runtime mode-setting
         self._register_video_refresh()
-
-        if self.scale_factor != 1:
-            new_size = tuple(size * self.scale_factor for size in self.framebuffer.get_size())
-            game_img = pygame.transform.scale(self.framebuffer, new_size)
+        game_img = self.framebuffer
 
         # draw the gamepad underneath if enabled
-        if self.pad_overlay is not None:
+        # FIXME: this is super inefficient
+        # - needs to not redraw if no pad state change
+        # - needs to not allocate a new screen-sized Surface every frame
+        if game_img is not None and self.pad_overlay is not None:
             pad_img = self.pad_overlay.Draw(self.pad)
             joined = pygame.Surface(self.ScreenSize())
             joined.blit(game_img, (0, 0))
@@ -111,10 +113,7 @@ class SuperOpti(Game):
             self.clock.tick(self.fps)
 
     def ScreenSize(self):
-        w, h = self.framebuffer.get_size()
-        w *= self.scale_factor
-        h *= self.scale_factor
-
+        w, h = self.screen_size
         if self.pad_overlay is not None:
             w = max(256, w)
             h += self.pad_overlay.frame.get_height()
