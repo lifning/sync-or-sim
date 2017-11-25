@@ -53,11 +53,18 @@ class SuperOpti(Game):
             print(av_info)
             self.fps = av_info['fps']
             self.screen_size = av_info['base_size']
-            self.framebuffer = None
-        screen = pygame.display.get_surface()
-        if self.framebuffer is None and screen is not None:
-            self.framebuffer = screen.subsurface(pygame.Rect((0, 0), self.screen_size))
-            retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
+        if self.framebuffer is not None:
+            if self.screen_size != self.framebuffer.get_size():
+                print('resize')
+                self.framebuffer = None
+        if self.framebuffer is None:
+            screen = pygame.display.get_surface()
+            if screen is not None:
+                rect = pygame.Rect((0, 0), self.screen_size).clip(
+                    pygame.Rect((0, 0), screen.get_size()))
+                self.framebuffer = screen.subsurface(rect)
+                retro.pygame_video.set_video_refresh_surface(self.emu, self.framebuffer)
+                print('framebuffer updated')
 
     def HumanInputs(self):
         return {'hat0_up': 0b000000010000,
