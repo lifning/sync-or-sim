@@ -3,8 +3,10 @@ import visualization.textlog
 
 
 class SimpleOnChangeStrategy(IStrategy):
-    # A strategy that watches emulator memory & sends it when a change is detected
-    # and applies data immediately when it is received (before collecting data to send)
+    """
+    A strategy that watches emulator memory & sends it when a change is detected
+    and applies data immediately when it is received (before collecting data to send)
+    """
     def __init__(self, offset_length_pairs, label):
         super().__init__()
         self.addresses = [MirroredAddress(x[1], x[0], source_bank=(x[2] if len(x) > 2 else 0))
@@ -52,6 +54,10 @@ class SimpleOnChangeStrategy(IStrategy):
                 consumed += addr.serializer.size
                 key = (offset, bank_switch)
                 if should_write:
+                    old = self.last_seen.get(key)
+                    if old is not None:
+                        assert len(old) == len(mem)
+                        mem, extra = addr.update_fn(old, mem)
                     caller.write_memory(offset, mem, bank_switch)
                     # also update last_seen so we don't send back something that we just wrote.
                     self.last_seen[key] = mem

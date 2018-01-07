@@ -42,15 +42,48 @@ class IStrategy:
         raise NotImplementedError
 
 
+class UpdateTypes:
+    """
+    Reference functions for common update types.
+    Parameters: (last observed bytes, incoming bytes)
+    Return: (result to write to memory, extra data for UI)
+    """
+    @staticmethod
+    def overwrite(old, new):
+        """
+        Clobbers old data by copy. Extra data is the changed bits.
+        """
+        return new, bytes(old[i] ^ new[i] for i in range(len(new)))
+
+    @staticmethod
+    def bitwise_or(old, new):
+        """
+        Only sets new bits, never clears them. Extra data is the newly set bits.
+        """
+        return (bytes(old[i] | new[i] for i in range(len(new))),
+                bytes(~old[i] & new[i] for i in range(len(new))))
+
+    @staticmethod
+    def bitwise_and(old, new):
+        """
+        Only clears bits, never sets them. Extra data is the newly cleared bits.
+        """
+        return (bytes(old[i] & new[i] for i in range(len(new))),
+                bytes(old[i] & ~new[i] for i in range(len(new))))
+
+
 class MirroredAddress:
-    def __init__(self, size, source_offset, target_offset=None, source_bank=0, target_bank=None, should_write=True):
+    def __init__(self, size, source_offset, target_offset=None, source_bank=0,
+                 target_bank=None, should_write=True, update_fn=UpdateTypes.overwrite):
         self.size = size
         self.source_offset = source_offset
         self.target_offset = target_offset if target_offset is not None else source_offset
         self.source_bank = source_bank
         self.target_bank = target_bank if target_bank is not None else source_bank
         self.should_write = should_write
-        self.serializer = struct.Struct(f'<LB?{size}s')  # target offset, target bank, should_write, data
+        # target offset, target bank, should_write, data
+        self.serializer = struct.Struct(f'<LB?{size}s')
+        self.update_fn = update_fn
 
     def legacy_tuple(self):
         return self.source_offset, self.size, self.source_bank
