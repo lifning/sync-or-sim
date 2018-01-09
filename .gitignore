@@ -1,6 +1,7 @@
 *.gb
 *.gen
 *.pyc
+*.swp
 .idea/tasks.xml
 .idea/workspace.xml
 *.pickle
