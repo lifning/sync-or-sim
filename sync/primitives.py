@@ -71,6 +71,10 @@ class UpdateTypes:
         return (bytes(old[i] & new[i] for i in range(len(new))),
                 bytes(old[i] & ~new[i] for i in range(len(new))))
 
+    @staticmethod
+    def fixed_value_fn(value):
+        return lambda _, new: value, new
+
 
 class MirroredAddress:
     def __init__(self, size, source_offset, target_offset=None, source_bank=0,

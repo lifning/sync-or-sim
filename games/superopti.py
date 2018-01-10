@@ -5,7 +5,6 @@ import pygame
 import py_retro as retro
 from skeleton_game import Game
 from visualization.snespad import SnesPadDrawing
-import visualization.textlog
 
 
 class SuperOpti(Game):

@@ -1,5 +1,5 @@
 from sync.primitives import IStrategy, MirroredAddress
-import visualization.textlog
+from visualization.textlog import TextLog
 
 
 class SimpleOnChangeStrategy(IStrategy):
@@ -41,7 +41,7 @@ class SimpleOnChangeStrategy(IStrategy):
                 self.last_seen[key] = block  # write it back
 
         if change_seen:
-            visualization.textlog.log_text(f'Sending {self.label}')
+            TextLog.instance.log_text(f'Sending {self.label}')
             return self.buffer
         return b''  # no change? send nothing.
 
@@ -63,7 +63,7 @@ class SimpleOnChangeStrategy(IStrategy):
                     self.last_seen[key] = mem
                 else:
                     self.received_unsynced[key] = mem
-            visualization.textlog.log_text(f'Received {self.label}')
+            TextLog.instance.log_text(f'Received {self.label}')
 
     def get_last_received_value(self, offset, length, bank_switch=0):
         value = self._get_value_from_received_map(self.received_unsynced, offset, length, bank_switch)

@@ -1,7 +1,6 @@
 from enum import Enum
 from sync.primitives import IGameSync, MirroredAddress
 from sync.strategies.simple_onchange import SimpleOnChangeStrategy
-import visualization.textlog
 
 ANIMATION_DYING = 0x18
 RESPAWN_WAIT_TIME = 200  # wait this many frames before allowing the player to jump back in.

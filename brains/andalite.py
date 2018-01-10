@@ -23,7 +23,7 @@ class Andalite(Sapiens):
         if game_sync_class is not None:
             self.game_sync = game_sync_class(self.game.PeekMemoryRegion, self.game.PokeMemoryRegion)
 
-        visualization.textlog.init_text_log_surface((256, self.game.ScreenSize()[1]))
+        self.text_log = visualization.textlog.TextLog((256, self.game.ScreenSize()[1]))
 
     def Step(self):
         if self.game_sync is not None:
@@ -37,7 +37,7 @@ class Andalite(Sapiens):
             window.blit(surf, (0, 0))
             surf_w = surf.get_width()
 
-        window.blit(visualization.textlog.draw(), (surf_w, 0))
+        window.blit(self.text_log.surface, (surf_w, 0))
         return window,
 
     def getReceivedData(self):
@@ -52,7 +52,7 @@ class Andalite(Sapiens):
 
     def ScreenSize(self):
         w, h = self.game.ScreenSize()
-        w += visualization.textlog.draw().get_width()
+        w += self.text_log.surface.get_width()
         return w, h
 
 
